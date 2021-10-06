@@ -31,7 +31,7 @@ type APIClientOptions struct {
 	RetryMax     int           // Maximum number of retries
 }
 
-func NewAPIClient(options APIClientOptions) (APIClient, error) {
+func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 	// if options.Server == "" {
 	// 	options.Server = "TODO: changethis"
 	// }

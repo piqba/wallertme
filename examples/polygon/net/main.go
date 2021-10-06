@@ -21,7 +21,7 @@ curl --location --request POST 'https://matic-mumbai.chainstacklabs.com/' \
 
 func main() {
 
-	api, err := web3.NewAPIClient(
+	api, err := web3.NewAPIEthClient(
 		web3.APIClientOptions{
 			Server: web3.PolygonTestNet,
 		},
