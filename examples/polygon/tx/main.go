@@ -25,7 +25,7 @@ func main() {
 
 	polygon, err := web3.NewAPIEthClient(
 		web3.APIClientOptions{
-			Server: web3.PolygonTestNet,
+			Server: web3.PolygonMainNet,
 		},
 	)
 	if err != nil {
@@ -34,7 +34,7 @@ func main() {
 
 	tx, err := polygon.TransactionByHash(
 		context.TODO(),
-		"0x0314f52b94f624695e9035df6f76ba7c0209a57462ec6c9ade577523883fb681",
+		"0x71c29304f9f80fc11da4295114720c553459f28a272e2742455df210d2dc4628",
 	)
 	if err != nil {
 		log.Fatal(err)
