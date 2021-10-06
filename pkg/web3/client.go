@@ -54,4 +54,5 @@ func NewAPIClient(options APIClientOptions) (APIClient, error) {
 
 type APIClient interface {
 	Version(ctx context.Context) (Version, error)
+	Listening(ctx context.Context) (Listening, error)
 }
