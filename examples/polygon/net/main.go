@@ -8,6 +8,17 @@ import (
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
+/*
+curl --location --request POST 'https://matic-mumbai.chainstacklabs.com/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+	"jsonrpc":"2.0",
+	"method":"net_version",
+	"params":[],
+	"id":67
+}'
+*/
+
 func main() {
 
 	api, err := web3.NewAPIClient(
