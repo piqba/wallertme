@@ -18,6 +18,7 @@ type HttpRequestDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+// APIClientOptions ...
 type APIClientOptions struct {
 
 	// Server url to use
@@ -31,6 +32,7 @@ type APIClientOptions struct {
 	RetryMax     int           // Maximum number of retries
 }
 
+// NewAPIEthClient ...
 func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 	// if options.Server == "" {
 	// 	options.Server = "TODO: changethis"
@@ -53,6 +55,10 @@ func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 }
 
 type APIClient interface {
+	// Version ...
 	Version(ctx context.Context) (Version, error)
+	// Listening ...
 	Listening(ctx context.Context) (Listening, error)
+	// TransactionByHash ...
+	TransactionByHash(ctx context.Context, hash string) (Transaction, error)
 }
