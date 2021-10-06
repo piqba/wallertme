@@ -1,16 +1,13 @@
 package web3
 
-import "encoding/json"
-
-func UnmarshalTransaction(data []byte) (Transaction, error) {
-	var r Transaction
-	err := json.Unmarshal(data, &r)
-	return r, err
-}
-
-func (r *Transaction) Marshal() ([]byte, error) {
-	return json.Marshal(r)
-}
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+)
 
 type Transaction struct {
 	Jsonrpc string `json:"jsonrpc"`
@@ -34,4 +31,45 @@ type Result struct {
 	V                string `json:"v"`
 	R                string `json:"r"`
 	S                string `json:"s"`
+}
+
+func (r *Result) ToJSON() string {
+	bytes, err := json.Marshal(r)
+	if err != nil {
+		return err.Error()
+	}
+	return string(bytes)
+}
+
+func (c *apiClient) TransactionByHash(ctx context.Context, hash string) (tx Transaction, err error) {
+	payload := strings.NewReader(
+		fmt.Sprintf(
+			`{
+				"jsonrpc":"2.0",
+				"method":"eth_getTransactionByHash",
+				"params":[
+					"%s"
+				],
+				"id":1
+			}`,
+			hash,
+		),
+	)
+	requestUrl, err := url.Parse(c.server)
+	if err != nil {
+		return Transaction{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload)
+	if err != nil {
+		return Transaction{}, err
+	}
+	res, err := c.handleRequest(req)
+	if err != nil {
+		return Transaction{}, err
+	}
+	defer res.Body.Close()
+	if err = json.NewDecoder(res.Body).Decode(&tx); err != nil {
+		return Transaction{}, err
+	}
+	return tx, nil
 }
