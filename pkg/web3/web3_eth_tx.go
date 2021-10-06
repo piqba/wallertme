@@ -40,6 +40,15 @@ func (r *Result) ToJSON() string {
 	}
 	return string(bytes)
 }
+func (r *Result) ParseDataFromHexToInt64() {
+	r.BlockNumber, _ = convHexToDec(r.BlockNumber)
+	r.Gas, _ = convHexToDec(r.Gas)
+	r.GasPrice, _ = convHexToDec(r.GasPrice)
+	r.Nonce, _ = convHexToDec(r.Nonce)
+	r.TransactionIndex, _ = convHexToDec(r.TransactionIndex)
+	r.Value, _ = convHexToDec(r.Value)
+	r.Type, _ = convHexToDec(r.Type)
+}
 
 func (c *apiClient) TransactionByHash(ctx context.Context, hash string) (tx Transaction, err error) {
 	payload := strings.NewReader(
@@ -71,5 +80,9 @@ func (c *apiClient) TransactionByHash(ctx context.Context, hash string) (tx Tran
 	if err = json.NewDecoder(res.Body).Decode(&tx); err != nil {
 		return Transaction{}, err
 	}
+
+	// parse result elements
+	tx.Result.ParseDataFromHexToInt64()
+
 	return tx, nil
 }
