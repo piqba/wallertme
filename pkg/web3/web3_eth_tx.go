@@ -3,19 +3,17 @@ package web3
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 type Transaction struct {
-	Jsonrpc string `json:"jsonrpc"`
-	ID      int64  `json:"id"`
-	Result  Result `json:"result"`
+	Jsonrpc string   `json:"jsonrpc"`
+	ID      int64    `json:"id"`
+	Result  ResultTx `json:"result"`
 }
 
-type Result struct {
+type ResultTx struct {
 	BlockHash        string `json:"blockHash"`
 	BlockNumber      string `json:"blockNumber"`
 	From             string `json:"from"`
@@ -33,14 +31,14 @@ type Result struct {
 	S                string `json:"s"`
 }
 
-func (r *Result) ToJSON() string {
+func (r *ResultTx) ToJSON() string {
 	bytes, err := json.Marshal(r)
 	if err != nil {
 		return err.Error()
 	}
 	return string(bytes)
 }
-func (r *Result) ParseDataFromHexToInt64() {
+func (r *ResultTx) ParseDataFromHexToInt64() {
 	r.BlockNumber, _ = convHexToDec(r.BlockNumber)
 	r.Gas, _ = convHexToDec(r.Gas)
 	r.GasPrice, _ = convHexToDec(r.GasPrice)
@@ -50,25 +48,56 @@ func (r *Result) ParseDataFromHexToInt64() {
 	r.Type, _ = convHexToDec(r.Type)
 }
 
-func (c *apiClient) TransactionByHash(ctx context.Context, hash string) (tx Transaction, err error) {
-	payload := strings.NewReader(
-		fmt.Sprintf(
-			`{
-				"jsonrpc":"2.0",
-				"method":"eth_getTransactionByHash",
-				"params":[
-					"%s"
-				],
-				"id":1
-			}`,
-			hash,
-		),
-	)
+type TransactionReceipt struct {
+	Jsonrpc string    `json:"jsonrpc"`
+	ID      int64     `json:"id"`
+	Result  ResultTxR `json:"result"`
+}
+
+type ResultTxR struct {
+	BlockHash         string      `json:"blockHash"`
+	BlockNumber       string      `json:"blockNumber"`
+	ContractAddress   interface{} `json:"contractAddress"`
+	CumulativeGasUsed string      `json:"cumulativeGasUsed"`
+	EffectiveGasPrice string      `json:"effectiveGasPrice"`
+	From              string      `json:"from"`
+	GasUsed           string      `json:"gasUsed"`
+	Logs              []Log       `json:"logs"`
+	LogsBloom         string      `json:"logsBloom"`
+	Status            string      `json:"status"`
+	To                string      `json:"to"`
+	TransactionHash   string      `json:"transactionHash"`
+	TransactionIndex  string      `json:"transactionIndex"`
+	Type              string      `json:"type"`
+}
+
+type Log struct {
+	Address          string   `json:"address"`
+	Topics           []string `json:"topics"`
+	Data             string   `json:"data"`
+	BlockNumber      string   `json:"blockNumber"`
+	TransactionHash  string   `json:"transactionHash"`
+	TransactionIndex string   `json:"transactionIndex"`
+	BlockHash        string   `json:"blockHash"`
+	LogIndex         string   `json:"logIndex"`
+	Removed          bool     `json:"removed"`
+}
+
+func (r *ResultTxR) ToJSON() string {
+	bytes, err := json.Marshal(r)
+	if err != nil {
+		return err.Error()
+	}
+	return string(bytes)
+}
+
+func (c *apiClient) TransactionByHash(ctx context.Context, payload PayloadReq) (tx Transaction, err error) {
+
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
 		return Transaction{}, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
 	if err != nil {
 		return Transaction{}, err
 	}
@@ -83,6 +112,31 @@ func (c *apiClient) TransactionByHash(ctx context.Context, hash string) (tx Tran
 
 	// parse result elements
 	tx.Result.ParseDataFromHexToInt64()
+
+	return tx, nil
+}
+
+func (c *apiClient) TransactionReceipt(ctx context.Context, payload PayloadReq) (tx TransactionReceipt, err error) {
+
+	requestUrl, err := url.Parse(c.server)
+	if err != nil {
+		return TransactionReceipt{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
+	if err != nil {
+		return TransactionReceipt{}, err
+	}
+	res, err := c.handleRequest(req)
+	if err != nil {
+		return TransactionReceipt{}, err
+	}
+	defer res.Body.Close()
+	if err = json.NewDecoder(res.Body).Decode(&tx); err != nil {
+		return TransactionReceipt{}, err
+	}
+
+	// parse result elements
+	// TODO: make parse
 
 	return tx, nil
 }
