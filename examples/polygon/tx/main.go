@@ -31,14 +31,31 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	payload := web3.PayloadReq{
+		Jsonrpc: "2.0",
+		Method:  "eth_getTransactionByHash",
+		Params: []interface{}{
+			"0x4e0cc9af12392335b447a823e50d9260a14db1d4445117e48e5247d26623e15c",
+		},
+		ID: 1,
+	}
+	// tx, err := polygon.TransactionByHash(
+	// 	context.TODO(),
+	// 	payload,
+	// )
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	tx, err := polygon.TransactionByHash(
+	// fmt.Printf("%+v", tx.Result.ToJSON())
+
+	txr, err := polygon.TransactionReceipt(
 		context.TODO(),
-		"0x71c29304f9f80fc11da4295114720c553459f28a272e2742455df210d2dc4628",
+		payload,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v", tx.Result.ToJSON())
+	fmt.Printf("%+v", txr.Result.ToJSON())
 }
