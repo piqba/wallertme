@@ -4,7 +4,6 @@ import (
 	"math/big"
 	"net/http"
 	"regexp"
-	"strconv"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/shopspring/decimal"
@@ -49,13 +48,12 @@ func (c *apiClient) handleRequest(req *http.Request) (res *http.Response, err er
 
 func convHexToDec(hexa string) (string, error) {
 	hexa = hexa[2:]
-	decimal, err := strconv.ParseInt(hexa, 16, 64)
+	i := new(big.Int)
+	i.SetString(hexa, 16)
+	i.SetString(i.String(), 10)
+	eth := ToDecimal(i, 18)
 
-	if err != nil {
-		return "0", err
-	}
-	stringValue := strconv.FormatInt(decimal, 10)
-	return stringValue, nil
+	return eth.String(), nil
 }
 
 // IsValidAddress validate hex address
