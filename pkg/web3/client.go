@@ -65,4 +65,8 @@ type APIClient interface {
 	TransactionReceipt(ctx context.Context, payload PayloadReq) (TransactionReceipt, error)
 	// Filter ...
 	Filter(ctx context.Context, payload PayloadReq) (FilterResponse, error)
+	// Balance
+	Balance(ctx context.Context, payload PayloadReq) (Balance, error)
+	// BlockByNumber ...
+	BlockByNumber(ctx context.Context, payload PayloadReq) (Block, error)
 }
