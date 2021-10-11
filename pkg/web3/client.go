@@ -34,9 +34,9 @@ type APIClientOptions struct {
 
 // NewAPIEthClient ...
 func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
-	// if options.Server == "" {
-	// 	options.Server = "TODO: changethis"
-	// }
+	if options.Server == "" {
+		options.Server = GanacheDevNet
+	}
 
 	retryclient := retryablehttp.NewClient()
 	retryclient.Logger = nil
@@ -63,8 +63,6 @@ type APIClient interface {
 	TransactionByHash(ctx context.Context, payload PayloadReq) (Transaction, error)
 	// TransactionReceipt ...
 	TransactionReceipt(ctx context.Context, payload PayloadReq) (TransactionReceipt, error)
-	// Filter ...
-	Filter(ctx context.Context, payload PayloadReq) (FilterResponse, error)
 	// Balance
 	Balance(ctx context.Context, payload PayloadReq) (Balance, error)
 	// BlockByNumber ...
