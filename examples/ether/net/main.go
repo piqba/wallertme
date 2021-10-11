@@ -9,7 +9,7 @@ import (
 )
 
 /*
-curl --location --request POST 'https://matic-mumbai.chainstacklabs.com/' \
+curl --location --request POST 'localhost:8545/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
 	"jsonrpc":"2.0",
@@ -23,7 +23,7 @@ func main() {
 
 	api, err := web3.NewAPIEthClient(
 		web3.APIClientOptions{
-			Server: web3.PolygonTestNet,
+			Server: web3.GanacheDevNet,
 		},
 	)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 )
 
 /*
-curl --location --request POST 'https://matic-mumbai.chainstacklabs.com/' \
+curl --location --request POST 'localhost:8545/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
 	"jsonrpc":"2.0",
@@ -25,7 +25,7 @@ func main() {
 
 	polygon, err := web3.NewAPIEthClient(
 		web3.APIClientOptions{
-			Server: web3.PolygonMainNet,
+			Server: web3.GanacheDevNet,
 		},
 	)
 	if err != nil {
@@ -39,15 +39,15 @@ func main() {
 		},
 		ID: 1,
 	}
-	// tx, err := polygon.TransactionByHash(
-	// 	context.TODO(),
-	// 	payload,
-	// )
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	tx, err := polygon.TransactionByHash(
+		context.TODO(),
+		payload,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// fmt.Printf("%+v", tx.Result.ToJSON())
+	fmt.Printf("%+v", tx.Result.ToJSON())
 
 	txr, err := polygon.TransactionReceipt(
 		context.TODO(),
