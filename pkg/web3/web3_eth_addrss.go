@@ -23,7 +23,7 @@ func (v *Balance) ToJSON() string {
 }
 
 func (b *Balance) ParseDataFromHexToInt64() {
-	result, err := convHexToDec(b.Result)
+	result, err := ConvHexToDec(b.Result)
 	b.Result = result
 	if err != nil {
 		log.Println(err)

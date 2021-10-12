@@ -46,7 +46,7 @@ func (c *apiClient) handleRequest(req *http.Request) (res *http.Response, err er
 	return res, nil
 }
 
-func convHexToDec(hexa string) (string, error) {
+func ConvHexToDec(hexa string) (string, error) {
 	hexa = hexa[2:]
 	i := new(big.Int)
 	i.SetString(hexa, 16)
