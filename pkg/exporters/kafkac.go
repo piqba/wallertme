@@ -8,7 +8,7 @@ const (
 )
 
 var (
-	ProducerKafka = GetProducerClientKafka()
+// ProducerKafka = GetProducerClientKafka()
 )
 
 func GetProducerClientKafka() *kafka.Producer {
