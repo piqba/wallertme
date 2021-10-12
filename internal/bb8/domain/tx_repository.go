@@ -3,12 +3,14 @@ package bb8
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/piqba/wallertme/pkg/exporters"
+	"github.com/piqba/wallertme/pkg/web3"
 )
 
 var (
@@ -33,31 +35,51 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 			repo.clientPgx = c
 		case *kafka.Producer:
 			repo.clientKafka = c
-
+		default:
+			return repo
 		}
 	}
 	return repo
 }
 
 func (r *TxRepository) ExportData(data interface{}) error {
+
 	tx := data.(ResultTx)
 	switch r.exporterType {
 	case exporters.JSONFILE:
 		fileName := fmt.Sprintf("export_%d.json", time.Now().UnixNano())
-		return exporters.ExportToJSON(cwd, fileName, data)
+
+		return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
 	case exporters.REDIS:
+
 		value, err := tx.ToMAP()
 		if err != nil {
 			return err
 		}
+
 		return exporters.ExportToRedisStream(r.clientRdb, exporters.TXS_STREAM_KEY, value)
+
 	case exporters.KAFKA:
+
 		value := tx.ToJSON()
+
 		return exporters.ExportTokafka(r.clientKafka, exporters.TXS_TOPIC_KEY, value)
+
 	case exporters.POSTGRESQL:
-		blockID := int(tx.Block)
+
+		blockNumber, err := web3.ConvHexToDec(tx.Block)
+		if err != nil {
+			return err
+		}
+		blockID, err := strconv.Atoi(blockNumber)
+		if err != nil {
+			return err
+		}
 		value := tx.ToJSON()
+
 		return exporters.ExportToPostgresql(r.clientPgx, blockID, value)
+
 	}
+
 	return nil
 }
