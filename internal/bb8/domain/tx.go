@@ -37,3 +37,15 @@ func (rtx *ResultTx) ToJSON() string {
 	}
 	return string(bytes)
 }
+func (rtx *ResultTx) ToMAP() (toHashMap map[string]interface{}, err error) {
+
+	fromStruct, err := json.Marshal(rtx)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(fromStruct, &toHashMap); err != nil {
+		return toHashMap, err
+	}
+
+	return toHashMap, nil
+}
