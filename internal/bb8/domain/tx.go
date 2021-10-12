@@ -8,21 +8,21 @@ import (
 // ResultTx ...
 type ResultTx struct {
 	// Time `time` is a transaction's timestamp
-	Time int64 `json:"time,omitempty"`
+	Time string `json:"time,omitempty"`
 	// Txfrom `txfrom` sender's Ethereum address
 	Txfrom string `json:"txfrom,omitempty"`
 	// Txto `txto` recipient's Ethereum address
 	Txto string `json:"txto,omitempty"`
 	// Gas `gas` indicates `gasUsed`
-	Gas int64 `json:"gas,omitempty"`
+	Gas string `json:"gas,omitempty"`
 	// Gasprice `gasprice` indicates `gasPrice`
-	Gasprice int64 `json:"gasprice,omitempty"`
+	Gasprice string `json:"gasprice,omitempty"`
 	// Block `block` is a transaction's block number
-	Block int64 `json:"block,omitempty"`
+	Block string `json:"block,omitempty"`
 	// Txhash `txhash` is a transaction's hash
 	Txhash string `json:"txhash,omitempty"`
 	// Value `value` stores amount of ETH transferred
-	Value int64 `json:"value,omitempty"`
+	Value string `json:"value,omitempty"`
 	// ContractTo `contract_to` indicates recipient's Ethereum address in case of contract
 	ContractTo string `json:"contract_to,omitempty"`
 	// ContractValue `contract_value` stores amount of ERC20 transaction in its tokens
