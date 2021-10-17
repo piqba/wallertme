@@ -39,13 +39,13 @@ func (r *ResultTx) ToJSON() string {
 	return string(bytes)
 }
 func (r *ResultTx) ParseDataFromHexToInt64() {
-	r.BlockNumber, _ = convHexToDec(r.BlockNumber)
-	r.Gas, _ = convHexToDec(r.Gas)
-	r.GasPrice, _ = convHexToDec(r.GasPrice)
-	r.Nonce, _ = convHexToDec(r.Nonce)
-	r.TransactionIndex, _ = convHexToDec(r.TransactionIndex)
-	r.Value, _ = convHexToDec(r.Value)
-	r.Type, _ = convHexToDec(r.Type)
+	r.BlockNumber, _ = ConvHexToDec(r.BlockNumber)
+	r.Gas, _ = ConvHexToDec(r.Gas)
+	r.GasPrice, _ = ConvHexToDec(r.GasPrice)
+	r.Nonce, _ = ConvHexToDec(r.Nonce)
+	r.TransactionIndex, _ = ConvHexToDec(r.TransactionIndex)
+	r.Value, _ = ConvHexToDec(r.Value)
+	r.Type, _ = ConvHexToDec(r.Type)
 }
 
 type TransactionReceipt struct {
