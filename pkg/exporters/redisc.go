@@ -2,6 +2,7 @@ package exporters
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/piqba/wallertme/pkg/errors"
@@ -26,8 +27,8 @@ var (
 func GetRedisDbClient() *redis.Client {
 
 	clientInstance := redis.NewClient(&redis.Options{
-		Addr:         ":6379", // use default Addr
-		Password:     "",      // no password set
+		Addr:         os.Getenv("REDIS_URI"),  // use default Addr
+		Password:     os.Getenv("REDIS_PASS"), // no password set
 		DB:           0,
 		DialTimeout:  60 * time.Second,
 		ReadTimeout:  60 * time.Second,
