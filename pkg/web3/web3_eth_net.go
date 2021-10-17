@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-type Version struct {
+type VersionETH struct {
 	JsonRPC string `json:"jsonrpc,omitempty"`
 	ID      int    `json:"id,omitempty"`
 	Result  string `json:"result,omitempty"`
 }
 
-func (v *Version) ToJSON() string {
+func (v *VersionETH) ToJSON() string {
 	bytes, err := json.Marshal(v)
 	if err != nil {
 		return err.Error()
@@ -22,13 +22,13 @@ func (v *Version) ToJSON() string {
 	return string(bytes)
 }
 
-type Listening struct {
+type ListeningETH struct {
 	JsonRPC string `json:"jsonrpc,omitempty"`
 	ID      int    `json:"id,omitempty"`
 	Result  string `json:"result,omitempty"`
 }
 
-func (l *Listening) ToJSON() string {
+func (l *ListeningETH) ToJSON() string {
 	bytes, err := json.Marshal(l)
 	if err != nil {
 		return err.Error()
@@ -36,7 +36,7 @@ func (l *Listening) ToJSON() string {
 	return string(bytes)
 }
 
-func (c *apiClient) Version(ctx context.Context) (version Version, err error) {
+func (c *apiClient) VersionETH(ctx context.Context) (version VersionETH, err error) {
 	payload := strings.NewReader(`{
 		"jsonrpc":"2.0",
 		"method":"net_version",
@@ -45,23 +45,23 @@ func (c *apiClient) Version(ctx context.Context) (version Version, err error) {
 	}`)
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
-		return Version{}, err
+		return VersionETH{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload)
 	if err != nil {
-		return Version{}, err
+		return VersionETH{}, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
-		return Version{}, err
+		return VersionETH{}, err
 	}
 	defer res.Body.Close()
 	if err = json.NewDecoder(res.Body).Decode(&version); err != nil {
-		return Version{}, err
+		return VersionETH{}, err
 	}
 	return version, nil
 }
-func (c *apiClient) Listening(ctx context.Context) (listening Listening, err error) {
+func (c *apiClient) ListeningETH(ctx context.Context) (listening ListeningETH, err error) {
 	payload := strings.NewReader(`{
 		"jsonrpc":"2.0",
 		"method":"net_listening",
@@ -70,19 +70,19 @@ func (c *apiClient) Listening(ctx context.Context) (listening Listening, err err
 	}`)
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
-		return Listening{}, err
+		return ListeningETH{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload)
 	if err != nil {
-		return Listening{}, err
+		return ListeningETH{}, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
-		return Listening{}, err
+		return ListeningETH{}, err
 	}
 	defer res.Body.Close()
 	if err = json.NewDecoder(res.Body).Decode(&listening); err != nil {
-		return Listening{}, err
+		return ListeningETH{}, err
 	}
 	return listening, nil
 }
