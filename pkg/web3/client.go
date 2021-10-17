@@ -54,17 +54,39 @@ func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 	return client, nil
 }
 
+// // NewAPICardanoClient ...
+// func NewAPICardanoClient(options APIClientOptions) (APIClient, error) {
+// 	if options.Server == "" {
+// 		options.Server = CardanoTestNet
+// 	}
+
+// 	retryclient := retryablehttp.NewClient()
+// 	retryclient.Logger = nil
+
+// 	if options.MaxRoutines == 0 {
+// 		options.MaxRoutines = 10
+// 	}
+
+// 	client := &apiClient{
+// 		server:   options.Server,
+// 		client:   retryclient,
+// 		routines: options.MaxRoutines,
+// 	}
+
+// 	return client, nil
+// }
+
 type APIClient interface {
 	// VersionETH ...
-	VersionETH(ctx context.Context) (Version, error)
+	VersionETH(ctx context.Context) (VersionETH, error)
 	// ListeningETH ...
-	ListeningETH(ctx context.Context) (Listening, error)
+	ListeningETH(ctx context.Context) (ListeningETH, error)
 	// TransactionByHashETH ...
-	TransactionByHashETH(ctx context.Context, payload PayloadReq) (Transaction, error)
+	TransactionByHashETH(ctx context.Context, payload PayloadReqEth) (TransactionETH, error)
 	// TransactionReceiptETH ...
-	TransactionReceiptETH(ctx context.Context, payload PayloadReq) (TransactionReceipt, error)
+	TransactionReceiptETH(ctx context.Context, payload PayloadReqEth) (TransactionReceiptETH, error)
 	// BalanceETH ...
-	BalanceETH(ctx context.Context, payload PayloadReq) (Balance, error)
+	BalanceETH(ctx context.Context, payload PayloadReqEth) (BalanceETH, error)
 	// BlockByNumberETH ...
-	BlockByNumberETH(ctx context.Context, payload PayloadReq) (Block, error)
+	BlockByNumberETH(ctx context.Context, payload PayloadReqEth) (BlockETH, error)
 }

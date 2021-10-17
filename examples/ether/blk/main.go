@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	payload := web3.PayloadReq{
+	payload := web3.PayloadReqEth{
 		Jsonrpc: "2.0",
 		Method:  "eth_getBlockByNumber",
 		Params: []interface{}{

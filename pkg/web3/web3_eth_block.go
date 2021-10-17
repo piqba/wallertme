@@ -7,13 +7,13 @@ import (
 	"net/url"
 )
 
-type Block struct {
-	ID      int64     `json:"id"`
-	Jsonrpc string    `json:"jsonrpc"`
-	Result  ResultBlk `json:"result"`
+type BlockETH struct {
+	ID      int64        `json:"id"`
+	Jsonrpc string       `json:"jsonrpc"`
+	Result  ResultBlkETH `json:"result"`
 }
 
-func (v *Block) ToJSON() string {
+func (v *BlockETH) ToJSON() string {
 	bytes, err := json.Marshal(v)
 	if err != nil {
 		return err.Error()
@@ -21,30 +21,30 @@ func (v *Block) ToJSON() string {
 	return string(bytes)
 }
 
-type ResultBlk struct {
-	Number           string               `json:"number"`
-	Hash             string               `json:"hash"`
-	ParentHash       string               `json:"parentHash"`
-	MixHash          string               `json:"mixHash"`
-	Nonce            string               `json:"nonce"`
-	Sha3Uncles       string               `json:"sha3Uncles"`
-	LogsBloom        string               `json:"logsBloom"`
-	TransactionsRoot string               `json:"transactionsRoot"`
-	StateRoot        string               `json:"stateRoot"`
-	ReceiptsRoot     string               `json:"receiptsRoot"`
-	Miner            string               `json:"miner"`
-	Difficulty       string               `json:"difficulty"`
-	TotalDifficulty  string               `json:"totalDifficulty"`
-	ExtraData        string               `json:"extraData"`
-	Size             string               `json:"size"`
-	GasLimit         string               `json:"gasLimit"`
-	GasUsed          string               `json:"gasUsed"`
-	Timestamp        string               `json:"timestamp"`
-	Transactions     []TransactionOnBlock `json:"transactions"`
-	Uncles           []interface{}        `json:"uncles"`
+type ResultBlkETH struct {
+	Number           string                  `json:"number"`
+	Hash             string                  `json:"hash"`
+	ParentHash       string                  `json:"parentHash"`
+	MixHash          string                  `json:"mixHash"`
+	Nonce            string                  `json:"nonce"`
+	Sha3Uncles       string                  `json:"sha3Uncles"`
+	LogsBloom        string                  `json:"logsBloom"`
+	TransactionsRoot string                  `json:"transactionsRoot"`
+	StateRoot        string                  `json:"stateRoot"`
+	ReceiptsRoot     string                  `json:"receiptsRoot"`
+	Miner            string                  `json:"miner"`
+	Difficulty       string                  `json:"difficulty"`
+	TotalDifficulty  string                  `json:"totalDifficulty"`
+	ExtraData        string                  `json:"extraData"`
+	Size             string                  `json:"size"`
+	GasLimit         string                  `json:"gasLimit"`
+	GasUsed          string                  `json:"gasUsed"`
+	Timestamp        string                  `json:"timestamp"`
+	Transactions     []TransactionOnBlockETH `json:"transactions"`
+	Uncles           []interface{}           `json:"uncles"`
 }
 
-type TransactionOnBlock struct {
+type TransactionOnBlockETH struct {
 	Hash             string `json:"hash"`
 	Nonce            string `json:"nonce"`
 	BlockHash        string `json:"blockHash"`
@@ -61,7 +61,7 @@ type TransactionOnBlock struct {
 	S                string `json:"s"`
 }
 
-func (v *ResultBlk) ToJSON() string {
+func (v *ResultBlkETH) ToJSON() string {
 	bytes, err := json.Marshal(v)
 	if err != nil {
 		return err.Error()
@@ -69,7 +69,7 @@ func (v *ResultBlk) ToJSON() string {
 	return string(bytes)
 }
 
-func (c *apiClient) BlockByNumberETH(ctx context.Context, payload PayloadReq) (blk Block, err error) {
+func (c *apiClient) BlockByNumberETH(ctx context.Context, payload PayloadReqEth) (blk BlockETH, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {

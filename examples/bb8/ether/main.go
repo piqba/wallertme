@@ -71,16 +71,16 @@ func main() {
 
 }
 
-func getTxByLatestBlock() (web3.Block, error) {
+func getTxByLatestBlock() (web3.BlockETH, error) {
 	api, err := web3.NewAPIEthClient(
 		web3.APIClientOptions{
 			Server: web3.GanacheDevNet,
 		},
 	)
 	if err != nil {
-		return web3.Block{}, err
+		return web3.BlockETH{}, err
 	}
-	payload := web3.PayloadReq{
+	payload := web3.PayloadReqEth{
 		Jsonrpc: "2.0",
 		Method:  "eth_getBlockByNumber",
 		Params: []interface{}{
@@ -93,7 +93,7 @@ func getTxByLatestBlock() (web3.Block, error) {
 	blc, err := api.BlockByNumberETH(context.TODO(), payload)
 	if err != nil {
 		log.Fatal(err)
-		return web3.Block{}, err
+		return web3.BlockETH{}, err
 	}
 	return blc, nil
 }

@@ -7,7 +7,7 @@ import (
 	"net/url"
 )
 
-type Transaction struct {
+type TransactionETH struct {
 	Jsonrpc string   `json:"jsonrpc"`
 	ID      int64    `json:"id"`
 	Result  ResultTx `json:"result"`
@@ -48,7 +48,7 @@ func (r *ResultTx) ParseDataFromHexToInt64() {
 	r.Type, _ = ConvHexToDec(r.Type)
 }
 
-type TransactionReceipt struct {
+type TransactionReceiptETH struct {
 	Jsonrpc string    `json:"jsonrpc"`
 	ID      int64     `json:"id"`
 	Result  ResultTxR `json:"result"`
@@ -91,23 +91,23 @@ func (r *ResultTxR) ToJSON() string {
 	return string(bytes)
 }
 
-func (c *apiClient) TransactionByHashETH(ctx context.Context, payload PayloadReq) (tx Transaction, err error) {
+func (c *apiClient) TransactionByHashETH(ctx context.Context, payload PayloadReqEth) (tx TransactionETH, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
-		return Transaction{}, err
+		return TransactionETH{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
 	if err != nil {
-		return Transaction{}, err
+		return TransactionETH{}, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
-		return Transaction{}, err
+		return TransactionETH{}, err
 	}
 	defer res.Body.Close()
 	if err = json.NewDecoder(res.Body).Decode(&tx); err != nil {
-		return Transaction{}, err
+		return TransactionETH{}, err
 	}
 
 	// parse result elements
@@ -116,23 +116,23 @@ func (c *apiClient) TransactionByHashETH(ctx context.Context, payload PayloadReq
 	return tx, nil
 }
 
-func (c *apiClient) TransactionReceiptETH(ctx context.Context, payload PayloadReq) (tx TransactionReceipt, err error) {
+func (c *apiClient) TransactionReceiptETH(ctx context.Context, payload PayloadReqEth) (tx TransactionReceiptETH, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
-		return TransactionReceipt{}, err
+		return TransactionReceiptETH{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
 	if err != nil {
-		return TransactionReceipt{}, err
+		return TransactionReceiptETH{}, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
-		return TransactionReceipt{}, err
+		return TransactionReceiptETH{}, err
 	}
 	defer res.Body.Close()
 	if err = json.NewDecoder(res.Body).Decode(&tx); err != nil {
-		return TransactionReceipt{}, err
+		return TransactionReceiptETH{}, err
 	}
 
 	// parse result elements
