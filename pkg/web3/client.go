@@ -54,27 +54,27 @@ func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 	return client, nil
 }
 
-// // NewAPICardanoClient ...
-// func NewAPICardanoClient(options APIClientOptions) (APIClient, error) {
-// 	if options.Server == "" {
-// 		options.Server = CardanoTestNet
-// 	}
+// NewAPICardanoClient ...
+func NewAPICardanoClient(options APIClientOptions) (APIClient, error) {
+	if options.Server == "" {
+		options.Server = CardanoTestNet
+	}
 
-// 	retryclient := retryablehttp.NewClient()
-// 	retryclient.Logger = nil
+	retryclient := retryablehttp.NewClient()
+	retryclient.Logger = nil
 
-// 	if options.MaxRoutines == 0 {
-// 		options.MaxRoutines = 10
-// 	}
+	if options.MaxRoutines == 0 {
+		options.MaxRoutines = 10
+	}
 
-// 	client := &apiClient{
-// 		server:   options.Server,
-// 		client:   retryclient,
-// 		routines: options.MaxRoutines,
-// 	}
+	client := &apiClient{
+		server:   options.Server,
+		client:   retryclient,
+		routines: options.MaxRoutines,
+	}
 
-// 	return client, nil
-// }
+	return client, nil
+}
 
 type APIClient interface {
 	// VersionETH ...
@@ -89,4 +89,6 @@ type APIClient interface {
 	BalanceETH(ctx context.Context, payload PayloadReqEth) (BalanceETH, error)
 	// BlockByNumberETH ...
 	BlockByNumberETH(ctx context.Context, payload PayloadReqEth) (BlockETH, error)
+
+	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
 }
