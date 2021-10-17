@@ -32,28 +32,6 @@ type APIClientOptions struct {
 	RetryMax     int           // Maximum number of retries
 }
 
-// NewAPIEthClient ...
-func NewAPIEthClient(options APIClientOptions) (APIETHClient, error) {
-	if options.Server == "" {
-		options.Server = GanacheDevNet
-	}
-
-	retryclient := retryablehttp.NewClient()
-	retryclient.Logger = nil
-
-	if options.MaxRoutines == 0 {
-		options.MaxRoutines = 10
-	}
-
-	client := &apiClient{
-		server:   options.Server,
-		client:   retryclient,
-		routines: options.MaxRoutines,
-	}
-
-	return client, nil
-}
-
 // NewAPICardanoClient ...
 func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	if options.Server == "" {
@@ -74,23 +52,6 @@ func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	}
 
 	return client, nil
-}
-
-type APIETHClient interface {
-	// VersionETH ...
-	VersionETH(ctx context.Context) (VersionETH, error)
-	// ListeningETH ...
-	ListeningETH(ctx context.Context) (ListeningETH, error)
-	// TransactionByHashETH ...
-	TransactionByHashETH(ctx context.Context, payload PayloadReqEth) (TransactionETH, error)
-	// TransactionReceiptETH ...
-	TransactionReceiptETH(ctx context.Context, payload PayloadReqEth) (TransactionReceiptETH, error)
-	// BalanceETH ...
-	BalanceETH(ctx context.Context, payload PayloadReqEth) (BalanceETH, error)
-	// BlockByNumberETH ...
-	BlockByNumberETH(ctx context.Context, payload PayloadReqEth) (BlockETH, error)
-
-	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
 }
 
 type APICardanoClient interface {
