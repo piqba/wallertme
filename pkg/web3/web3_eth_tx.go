@@ -91,7 +91,7 @@ func (r *ResultTxR) ToJSON() string {
 	return string(bytes)
 }
 
-func (c *apiClient) TransactionByHash(ctx context.Context, payload PayloadReq) (tx Transaction, err error) {
+func (c *apiClient) TransactionByHashETH(ctx context.Context, payload PayloadReq) (tx Transaction, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
@@ -116,7 +116,7 @@ func (c *apiClient) TransactionByHash(ctx context.Context, payload PayloadReq) (
 	return tx, nil
 }
 
-func (c *apiClient) TransactionReceipt(ctx context.Context, payload PayloadReq) (tx TransactionReceipt, err error) {
+func (c *apiClient) TransactionReceiptETH(ctx context.Context, payload PayloadReq) (tx TransactionReceipt, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {

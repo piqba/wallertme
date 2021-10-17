@@ -42,7 +42,7 @@ func main() {
 		ID: 1,
 	}
 
-	blc, err := api.BlockByNumber(context.TODO(), payload)
+	blc, err := api.BlockByNumberETH(context.TODO(), payload)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -36,7 +36,7 @@ func (l *Listening) ToJSON() string {
 	return string(bytes)
 }
 
-func (c *apiClient) Version(ctx context.Context) (version Version, err error) {
+func (c *apiClient) VersionETH(ctx context.Context) (version Version, err error) {
 	payload := strings.NewReader(`{
 		"jsonrpc":"2.0",
 		"method":"net_version",
@@ -61,7 +61,7 @@ func (c *apiClient) Version(ctx context.Context) (version Version, err error) {
 	}
 	return version, nil
 }
-func (c *apiClient) Listening(ctx context.Context) (listening Listening, err error) {
+func (c *apiClient) ListeningETH(ctx context.Context) (listening Listening, err error) {
 	payload := strings.NewReader(`{
 		"jsonrpc":"2.0",
 		"method":"net_listening",

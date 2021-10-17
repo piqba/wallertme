@@ -69,7 +69,7 @@ func (v *ResultBlk) ToJSON() string {
 	return string(bytes)
 }
 
-func (c *apiClient) BlockByNumber(ctx context.Context, payload PayloadReq) (blk Block, err error) {
+func (c *apiClient) BlockByNumberETH(ctx context.Context, payload PayloadReq) (blk Block, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {

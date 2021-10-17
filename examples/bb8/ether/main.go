@@ -90,7 +90,7 @@ func getTxByLatestBlock() (web3.Block, error) {
 		ID: 1,
 	}
 
-	blc, err := api.BlockByNumber(context.TODO(), payload)
+	blc, err := api.BlockByNumberETH(context.TODO(), payload)
 	if err != nil {
 		log.Fatal(err)
 		return web3.Block{}, err

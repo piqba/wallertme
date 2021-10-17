@@ -42,7 +42,7 @@ func main() {
 		ID: 1,
 	}
 
-	blc, err := api.Balance(context.TODO(), payload)
+	blc, err := api.BalanceETH(context.TODO(), payload)
 	if err != nil {
 		log.Fatal(err)
 	}

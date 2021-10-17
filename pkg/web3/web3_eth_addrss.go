@@ -30,7 +30,7 @@ func (b *Balance) ParseDataFromHexToInt64() {
 	}
 }
 
-func (c *apiClient) Balance(ctx context.Context, payload PayloadReq) (blc Balance, err error) {
+func (c *apiClient) BalanceETH(ctx context.Context, payload PayloadReq) (blc Balance, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
