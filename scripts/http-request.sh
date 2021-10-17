@@ -1,11 +1,1 @@
-curl --location --request POST 'localhost:8545/' \
---header 'Content-Type: application/json' \
---data-raw '{
-	"jsonrpc":"2.0",
-	"method":"eth_getBlockByNumber",
-	"params":[
-		"latest",
-		true
-	],
-	"id":1
-}'
+curl https://explorer-api.testnet.dandelion.link/api/addresses/summary/addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx

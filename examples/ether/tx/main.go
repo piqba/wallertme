@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	payload := web3.PayloadReq{
+	payload := web3.PayloadReqEth{
 		Jsonrpc: "2.0",
 		Method:  "eth_getTransactionByHash",
 		Params: []interface{}{
@@ -39,7 +39,7 @@ func main() {
 		},
 		ID: 1,
 	}
-	tx, err := polygon.TransactionByHash(
+	tx, err := polygon.TransactionByHashETH(
 		context.TODO(),
 		payload,
 	)
@@ -49,7 +49,7 @@ func main() {
 
 	fmt.Printf("%+v", tx.Result.ToJSON())
 
-	txr, err := polygon.TransactionReceipt(
+	txr, err := polygon.TransactionReceiptETH(
 		context.TODO(),
 		payload,
 	)

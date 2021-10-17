@@ -30,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	version, err := api.Version(context.TODO())
+	version, err := api.VersionETH(context.TODO())
 	if err != nil {
 		log.Fatal(err)
 	}

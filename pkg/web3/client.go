@@ -33,7 +33,7 @@ type APIClientOptions struct {
 }
 
 // NewAPIEthClient ...
-func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
+func NewAPIEthClient(options APIClientOptions) (APIETHClient, error) {
 	if options.Server == "" {
 		options.Server = GanacheDevNet
 	}
@@ -54,17 +54,46 @@ func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 	return client, nil
 }
 
-type APIClient interface {
-	// Version ...
-	Version(ctx context.Context) (Version, error)
-	// Listening ...
-	Listening(ctx context.Context) (Listening, error)
-	// TransactionByHash ...
-	TransactionByHash(ctx context.Context, payload PayloadReq) (Transaction, error)
-	// TransactionReceipt ...
-	TransactionReceipt(ctx context.Context, payload PayloadReq) (TransactionReceipt, error)
-	// Balance
-	Balance(ctx context.Context, payload PayloadReq) (Balance, error)
-	// BlockByNumber ...
-	BlockByNumber(ctx context.Context, payload PayloadReq) (Block, error)
+// NewAPICardanoClient ...
+func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
+	if options.Server == "" {
+		options.Server = CardanoTestNet
+	}
+
+	retryclient := retryablehttp.NewClient()
+	retryclient.Logger = nil
+
+	if options.MaxRoutines == 0 {
+		options.MaxRoutines = 10
+	}
+
+	client := &apiClient{
+		server:   options.Server,
+		client:   retryclient,
+		routines: options.MaxRoutines,
+	}
+
+	return client, nil
+}
+
+type APIETHClient interface {
+	// VersionETH ...
+	VersionETH(ctx context.Context) (VersionETH, error)
+	// ListeningETH ...
+	ListeningETH(ctx context.Context) (ListeningETH, error)
+	// TransactionByHashETH ...
+	TransactionByHashETH(ctx context.Context, payload PayloadReqEth) (TransactionETH, error)
+	// TransactionReceiptETH ...
+	TransactionReceiptETH(ctx context.Context, payload PayloadReqEth) (TransactionReceiptETH, error)
+	// BalanceETH ...
+	BalanceETH(ctx context.Context, payload PayloadReqEth) (BalanceETH, error)
+	// BlockByNumberETH ...
+	BlockByNumberETH(ctx context.Context, payload PayloadReqEth) (BlockETH, error)
+
+	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
+}
+
+type APICardanoClient interface {
+	// SumaryAddrADA ...
+	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
 }

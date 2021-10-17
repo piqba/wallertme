@@ -8,13 +8,13 @@ import (
 	"net/url"
 )
 
-type Balance struct {
+type BalanceETH struct {
 	JsonRPC string `json:"jsonrpc,omitempty"`
 	ID      int    `json:"id,omitempty"`
 	Result  string `json:"result,omitempty"`
 }
 
-func (v *Balance) ToJSON() string {
+func (v *BalanceETH) ToJSON() string {
 	bytes, err := json.Marshal(v)
 	if err != nil {
 		return err.Error()
@@ -22,7 +22,7 @@ func (v *Balance) ToJSON() string {
 	return string(bytes)
 }
 
-func (b *Balance) ParseDataFromHexToInt64() {
+func (b *BalanceETH) ParseDataFromHexToInt64() {
 	result, err := ConvHexToDec(b.Result)
 	b.Result = result
 	if err != nil {
@@ -30,7 +30,7 @@ func (b *Balance) ParseDataFromHexToInt64() {
 	}
 }
 
-func (c *apiClient) Balance(ctx context.Context, payload PayloadReq) (blc Balance, err error) {
+func (c *apiClient) BalanceETH(ctx context.Context, payload PayloadReqEth) (blc BalanceETH, err error) {
 
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {

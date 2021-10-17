@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	payload := web3.PayloadReq{
+	payload := web3.PayloadReqEth{
 		Jsonrpc: "2.0",
 		Method:  "eth_getBlockByNumber",
 		Params: []interface{}{
@@ -42,7 +42,7 @@ func main() {
 		ID: 1,
 	}
 
-	blc, err := api.BlockByNumber(context.TODO(), payload)
+	blc, err := api.BlockByNumberETH(context.TODO(), payload)
 	if err != nil {
 		log.Fatal(err)
 	}
