@@ -33,7 +33,7 @@ type APIClientOptions struct {
 }
 
 // NewAPIEthClient ...
-func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
+func NewAPIEthClient(options APIClientOptions) (APIETHClient, error) {
 	if options.Server == "" {
 		options.Server = GanacheDevNet
 	}
@@ -55,7 +55,7 @@ func NewAPIEthClient(options APIClientOptions) (APIClient, error) {
 }
 
 // NewAPICardanoClient ...
-func NewAPICardanoClient(options APIClientOptions) (APIClient, error) {
+func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	if options.Server == "" {
 		options.Server = CardanoTestNet
 	}
@@ -76,7 +76,7 @@ func NewAPICardanoClient(options APIClientOptions) (APIClient, error) {
 	return client, nil
 }
 
-type APIClient interface {
+type APIETHClient interface {
 	// VersionETH ...
 	VersionETH(ctx context.Context) (VersionETH, error)
 	// ListeningETH ...
@@ -90,5 +90,10 @@ type APIClient interface {
 	// BlockByNumberETH ...
 	BlockByNumberETH(ctx context.Context, payload PayloadReqEth) (BlockETH, error)
 
+	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
+}
+
+type APICardanoClient interface {
+	// SumaryAddrADA ...
 	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
 }
