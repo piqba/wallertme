@@ -41,8 +41,8 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 }
 
 func (r *TxRepository) ExportData(data interface{}) error {
+	tx := data.(ResultLastTxByAddr)
 
-	tx := data.(ResultTxADA)
 	switch r.exporterType {
 	case exporters.JSONFILE:
 		fileName := fmt.Sprintf("export_%d.json", time.Now().UnixNano())
@@ -66,7 +66,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 	case exporters.POSTGRESQL:
 
 		value := tx.ToJSON()
-		return exporters.ExportToPostgresql(r.clientPgx, 12, value)
+		return exporters.ExportToPostgresql(r.clientPgx, int(tx.CtbTimeIssued), value)
 
 	}
 
