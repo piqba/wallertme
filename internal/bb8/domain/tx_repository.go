@@ -1,6 +1,7 @@
 package bb8
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/piqba/wallertme/pkg/exporters"
+	"github.com/piqba/wallertme/pkg/web3"
 )
 
 var (
@@ -20,6 +22,11 @@ type TxRepository struct {
 	clientRdb    *redis.Client
 	clientPgx    *sqlx.DB
 	clientKafka  *kafka.Producer
+	limitTx      int
+}
+
+func NewTx(limit int) TxRepository {
+	return TxRepository{limitTx: limit}
 }
 
 func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
@@ -71,4 +78,30 @@ func (r *TxRepository) ExportData(data interface{}) error {
 	}
 
 	return nil
+}
+
+func (r *TxRepository) InfoByAddress(address string) (ResultInfoByAddr, error) {
+
+	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
+	if err != nil {
+		return ResultInfoByAddr{}, err
+	}
+
+	sumary, err := cardano.SumaryAddrADA(context.TODO(), address)
+	if err != nil {
+		return ResultInfoByAddr{}, err
+	}
+
+	return ResultInfoByAddr{
+		Address:   address,
+		Type:      sumary.Result.CAType,
+		BlockNO:   sumary.Result.CAChainTip.CTBlockNo,
+		BlockHash: sumary.Result.CAChainTip.CTBlockHash,
+		TxTotal:   sumary.Result.CATxNum,
+		Balance:   sumary.Result.CABalance.GetCoin,
+		TotalIn:   sumary.Result.CATotalInput.GetCoin,
+		TotalOut:  sumary.Result.CATotalOutput.GetCoin,
+		TotalFee:  sumary.Result.CATotalFee.GetCoin,
+		TxList:    sumary.Result.CATxList,
+	}, nil
 }
