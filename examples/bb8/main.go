@@ -11,7 +11,8 @@ import (
 
 func main() {
 
-	repo := domain.NewTxRepository(exporters.JSONFILE, nil)
+	rdb := exporters.GetRedisDbClient()
+	repo := domain.NewTxRepository(exporters.REDIS, rdb)
 
 	block, err := getTxByLatestBlock()
 	if err != nil {
