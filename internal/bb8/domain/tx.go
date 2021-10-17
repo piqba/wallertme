@@ -7,6 +7,10 @@ import (
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
+type Txer interface {
+	InfoByAddress(address string) (ResultInfoByAddr, error)
+}
+
 // ResultInfoByAddr ...
 type ResultInfoByAddr struct {
 	Address   string          `json:"address,omitempty"`
