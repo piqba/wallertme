@@ -3,16 +3,45 @@ package main
 import (
 	"context"
 	"log"
+	"runtime"
 
+	"github.com/joho/godotenv"
 	domain "github.com/piqba/wallertme/internal/bb8/domain"
+	"github.com/piqba/wallertme/pkg/constants"
 	"github.com/piqba/wallertme/pkg/exporters"
+	"github.com/piqba/wallertme/pkg/logger"
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
-func main() {
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	numcpu := runtime.NumCPU()
+	runtime.GOMAXPROCS(numcpu) // Try to use all available CPUs.
+}
 
-	rdb := exporters.GetRedisDbClient()
-	repo := domain.NewTxRepository(exporters.REDIS, rdb)
+func main() {
+	exporterType := exporters.REDIS
+	var repo domain.TxRepository
+	switch exporterType {
+	case exporters.REDIS:
+		rdb := exporters.GetRedisDbClient()
+		repo = domain.NewTxRepository(exporters.REDIS, rdb)
+	case exporters.JSONFILE:
+		repo = domain.NewTxRepository(exporters.JSONFILE, nil)
+	case exporters.POSTGRESQL:
+		pg, err := exporters.PostgreSQLConnection()
+		if err != nil {
+			logger.LogError(err.Error())
+		}
+		pg.MustExec(constants.SchemaTXS)
+		repo = domain.NewTxRepository(exporters.POSTGRESQL, pg)
+	case exporters.KAFKA:
+		pk := exporters.GetProducerClientKafka()
+		repo = domain.NewTxRepository(exporters.KAFKA, pk)
+	}
 
 	block, err := getTxByLatestBlock()
 	if err != nil {
