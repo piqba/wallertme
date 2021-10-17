@@ -23,7 +23,7 @@ func init() {
 }
 
 func main() {
-	exporterType := exporters.REDIS
+	exporterType := exporters.JSONFILE
 	var repo domain.TxRepository
 	switch exporterType {
 	case exporters.REDIS:
@@ -42,58 +42,37 @@ func main() {
 		pk := exporters.GetProducerClientKafka()
 		repo = domain.NewTxRepository(exporters.KAFKA, pk)
 	}
+	address := "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx"
+	addrInfo := getTxByAddress(address)
+	tx := domain.ResultTxADA{
+		Address:   addrInfo.Result.CAAddress,
+		Type:      addrInfo.Result.CAType,
+		BlockNO:   addrInfo.Result.CAChainTip.CTBlockNo,
+		BlockHash: addrInfo.Result.CAChainTip.CTBlockHash,
+		TxTotal:   addrInfo.Result.CATxNum,
+		Balance:   addrInfo.Result.CABalance.GetCoin,
+		TotalIn:   addrInfo.Result.CATotalInput.GetCoin,
+		TotalOut:  addrInfo.Result.CATotalOutput.GetCoin,
+		TotalFee:  addrInfo.Result.CATotalFee.GetCoin,
+		TxList:    addrInfo.Result.CATxList,
+	}
 
-	block, err := getTxByLatestBlock()
+	err := repo.ExportData(tx)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	for _, txInBlock := range block.Result.Transactions {
-
-		tx := domain.ResultTx{
-			Time:          block.Result.Timestamp,
-			Txfrom:        txInBlock.From,
-			Txto:          txInBlock.To,
-			Gas:           txInBlock.Gas,
-			Gasprice:      txInBlock.GasPrice,
-			Block:         block.Result.Number,
-			Txhash:        txInBlock.Hash,
-			Value:         txInBlock.Value,
-			ContractTo:    "",
-			ContractValue: "",
-		}
-
-		err := repo.ExportData(tx)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
 }
 
-func getTxByLatestBlock() (web3.BlockETH, error) {
-	api, err := web3.NewAPIEthClient(
-		web3.APIClientOptions{
-			Server: web3.GanacheDevNet,
-		},
-	)
-	if err != nil {
-		return web3.BlockETH{}, err
-	}
-	payload := web3.PayloadReqEth{
-		Jsonrpc: "2.0",
-		Method:  "eth_getBlockByNumber",
-		Params: []interface{}{
-			"0x2",
-			true,
-		},
-		ID: 1,
-	}
-
-	blc, err := api.BlockByNumberETH(context.TODO(), payload)
+func getTxByAddress(address string) web3.AddrSumary {
+	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
 	if err != nil {
 		log.Fatal(err)
-		return web3.BlockETH{}, err
 	}
-	return blc, nil
+
+	sumary, err := cardano.SumaryAddrADA(context.TODO(), address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return sumary
 }
