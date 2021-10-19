@@ -62,17 +62,17 @@ func ExportToJSON(path, filename string, value interface{}) error {
 }
 
 // ExportToRedisStream ...
-func ExportToRedisStream(rdb *redis.Client, key string, id string, value map[string]interface{}) error {
+func ExportToRedisStream(rdb *redis.Client, key string, value map[string]interface{}) error {
 
 	err := rdb.XAdd(context.TODO(), &redis.XAddArgs{
 		Stream: key,
 		Values: value,
-		ID:     id,
 	}).Err()
-	if err.Error() == ErrRedisXADDStreamID.Error() {
-		return ErrRedisXADDStreamID
-	}
+
 	if err != nil {
+		if err.Error() == ErrRedisXADDStreamID.Error() {
+			return ErrRedisXADDStreamID
+		}
 		return err
 	}
 
