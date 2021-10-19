@@ -65,7 +65,6 @@ func (r *TxRepository) ExportData(data interface{}) error {
 		return exporters.ExportToRedisStream(
 			r.clientRdb,
 			exporters.TXS_STREAM_KEY,
-			fmt.Sprintf("%d", tx.CtbTimeIssued), // add this for ensuere that it`s unique ID based on TX timestamp
 			value,
 		)
 
@@ -109,4 +108,22 @@ func (r *TxRepository) InfoByAddress(address string) (ResultInfoByAddr, error) {
 		TotalFee:  sumary.Result.CATotalFee.GetCoin,
 		TxList:    sumary.Result.CATxList,
 	}, nil
+}
+
+func (r *TxRepository) Set(ctx context.Context, address, lastTx string, expiration time.Duration) error {
+	// err = redisdb.Set("key", "value", 0).Err() never expire
+	// err = redisdb.Set("key", "value", time.Hour).Err()
+	err := r.clientRdb.Set(ctx, address, lastTx, expiration).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *TxRepository) Get(ctx context.Context, address string) (string, error) {
+	lastTx, err := r.clientRdb.Get(ctx, address).Result()
+	if err != nil {
+		return "", err
+	}
+	return lastTx, nil
 }
