@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	addrSender   = "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx"
-	addrReceiver = "addr_test1qq5287luxzj5l4lequrqdp5ln76ver4uls3z0m5ykr5gqsv0vxzrwcq5dmmn9e09rvgttzgrngmpxkguy7220r0u0ljqzuww7g"
+	TxSender   = "sender"
+	TxReceiver = "receiver"
 )
 
 func init() {
@@ -34,6 +34,17 @@ func init() {
 
 func main() {
 
+	// TODO: get from database with other metadata from wallets register
+	wallets := []map[string]interface{}{
+		{
+			"address": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+			"lastTx":  "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+		},
+		{
+			"address": "addr_test1qq5287luxzj5l4lequrqdp5ln76ver4uls3z0m5ykr5gqsv0vxzrwcq5dmmn9e09rvgttzgrngmpxkguy7220r0u0ljqzuww7g",
+			"lastTx":  "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+		},
+	}
 	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, os.Interrupt)
@@ -72,7 +83,9 @@ func main() {
 			run = false
 			defer cancel()
 		case <-time.Tick(ds):
-			Exce(repo)
+			for _, w := range wallets {
+				Exce(repo, w, exporterType)
+			}
 			if !watch {
 				run = false
 			}
@@ -81,13 +94,14 @@ func main() {
 
 }
 
-func Exce(repo domain.TxRepository) {
+func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType string) {
 
-	addrInfo := getTxByAddress(addrReceiver)
+	addrInfo := getTxByAddress(wallet["address"].(string))
+
 	lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
 
 	tx := domain.ResultLastTxByAddr{
-		Addr:          addrReceiver,
+		Addr:          wallet["address"].(string),
 		CtbID:         lastTX.CtbID,
 		CtbTimeIssued: lastTX.CtbTimeIssued,
 		FromAddr:      lastTX.CtbOutputs[0].CtaAddress,
@@ -95,19 +109,41 @@ func Exce(repo domain.TxRepository) {
 		Balance:       addrInfo.Result.CABalance.GetCoin,
 		Ammount:       lastTX.CtbOutputs[1].CtaAmount.GetCoin,
 	}
-	if addrReceiver == tx.FromAddr {
-		tx.TypeTx = "sender"
-	} else if addrReceiver == tx.ToAddr {
-		tx.TypeTx = "receiver"
-	}
+	switch exporterType {
+	case exporters.REDIS:
 
-	err := repo.ExportData(tx)
-	if err != nil {
-		if errors.Is(err, exporters.ErrRedisXADDStreamID) {
-			logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
-			return
+		lastTXFromRdb, err := repo.Get(context.TODO(), wallet["address"].(string))
+		if err != nil {
+			logger.LogError(err.Error())
 		}
-		logger.LogError(err.Error())
+		if tx.CtbID != lastTXFromRdb {
+
+			if wallet["address"].(string) == tx.FromAddr {
+				tx.TypeTx = TxSender
+			} else if wallet["address"].(string) == tx.ToAddr {
+				tx.TypeTx = TxReceiver
+			}
+
+			err := repo.ExportData(tx)
+			if err != nil {
+				if errors.Is(err, exporters.ErrRedisXADDStreamID) {
+					logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
+					return
+				}
+				logger.LogError(err.Error())
+			}
+			err = repo.Set(context.TODO(), wallet["address"].(string), tx.CtbID, 0)
+			if err != nil {
+				logger.LogError(err.Error())
+			}
+		} else {
+			logger.LogWarn(fmt.Sprintf("NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
+		}
+	case exporters.JSONFILE:
+		err := repo.ExportData(tx)
+		if err != nil {
+			logger.LogError(err.Error())
+		}
 	}
 }
 
