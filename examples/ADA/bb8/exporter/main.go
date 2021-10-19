@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"runtime"
+	"time"
 
 	"github.com/joho/godotenv"
 	domain "github.com/piqba/wallertme/internal/bb8/domain"
@@ -28,7 +33,12 @@ func init() {
 }
 
 func main() {
-	exporterType := exporters.JSONFILE
+
+	quit := make(chan os.Signal, 1)
+
+	signal.Notify(quit, os.Interrupt)
+
+	exporterType := exporters.REDIS
 	var repo domain.TxRepository
 	switch exporterType {
 	case exporters.REDIS:
@@ -48,6 +58,31 @@ func main() {
 		repo = domain.NewTxRepository(exporters.KAFKA, pk)
 	}
 
+	run := true
+	watch := true
+	ds, err := time.ParseDuration("1s")
+	if err != nil {
+		logger.LogError("Failed to parse durations " + err.Error())
+	}
+	for run {
+		select {
+		case sig := <-quit:
+			logger.LogInfo(fmt.Sprintf("server is shutting down %v", sig.String()))
+			_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			run = false
+			defer cancel()
+		case <-time.Tick(ds):
+			Exce(repo)
+			if !watch {
+				run = false
+			}
+		}
+	}
+
+}
+
+func Exce(repo domain.TxRepository) {
+
 	addrInfo := getTxByAddress(addrReceiver)
 	lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
 
@@ -66,10 +101,13 @@ func main() {
 		tx.TypeTx = "receiver"
 	}
 
-	// fmt.Println(tx.ToJSON(), repo)
 	err := repo.ExportData(tx)
 	if err != nil {
-		log.Fatal(err)
+		if errors.Is(err, exporters.ErrRedisXADDStreamID) {
+			logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
+			return
+		}
+		logger.LogError(err.Error())
 	}
 }
 
