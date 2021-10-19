@@ -1,14 +1,18 @@
 package bb8
 
 import (
+	"context"
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
 type Txer interface {
 	InfoByAddress(address string) (ResultInfoByAddr, error)
+	Set(ctx context.Context, key, value string, expiration time.Duration) error
+	Get(ctx context.Context, key string) (string, error)
 }
 
 type ResultLastTxByAddr struct {
