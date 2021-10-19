@@ -62,7 +62,12 @@ func (r *TxRepository) ExportData(data interface{}) error {
 			return err
 		}
 
-		return exporters.ExportToRedisStream(r.clientRdb, exporters.TXS_STREAM_KEY, value)
+		return exporters.ExportToRedisStream(
+			r.clientRdb,
+			exporters.TXS_STREAM_KEY,
+			fmt.Sprintf("%d", tx.CtbTimeIssued), // add this for ensuere that it`s unique ID based on TX timestamp
+			value,
+		)
 
 	case exporters.KAFKA:
 
