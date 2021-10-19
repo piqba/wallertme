@@ -11,20 +11,6 @@ type Txer interface {
 	InfoByAddress(address string) (ResultInfoByAddr, error)
 }
 
-// ResultInfoByAddr ...
-type ResultInfoByAddr struct {
-	Address   string          `json:"address,omitempty"`
-	Type      string          `json:"type,omitempty"`
-	BlockNO   int64           `json:"block_no,omitempty"`
-	BlockHash string          `json:"block_hash,omitempty"`
-	TxTotal   int64           `json:"tx_total,omitempty"`
-	Balance   string          `json:"balance,omitempty"`
-	TotalIn   string          `json:"total_in,omitempty"`
-	TotalOut  string          `json:"total_out,omitempty"`
-	TotalFee  string          `json:"total_fee,omitempty"`
-	TxList    []web3.CATxList `json:"tx_list,omitempty"`
-}
-
 type ResultLastTxByAddr struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
@@ -58,6 +44,28 @@ func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err er
 	return toHashMap, nil
 }
 
+// TruncateAddress ...
+func (rtx *ResultLastTxByAddr) TruncateAddress(address string) string {
+	prefix := address[0:16]
+	sufix := address[len(address)-16:]
+	cleanAddress := prefix + "..." + sufix
+	return cleanAddress
+}
+
+// ResultInfoByAddr ...
+type ResultInfoByAddr struct {
+	Address   string          `json:"address,omitempty"`
+	Type      string          `json:"type,omitempty"`
+	BlockNO   int64           `json:"block_no,omitempty"`
+	BlockHash string          `json:"block_hash,omitempty"`
+	TxTotal   int64           `json:"tx_total,omitempty"`
+	Balance   string          `json:"balance,omitempty"`
+	TotalIn   string          `json:"total_in,omitempty"`
+	TotalOut  string          `json:"total_out,omitempty"`
+	TotalFee  string          `json:"total_fee,omitempty"`
+	TxList    []web3.CATxList `json:"tx_list,omitempty"`
+}
+
 // ToJSON ...
 func (rtx *ResultInfoByAddr) ToJSON() string {
 	bytes, err := json.Marshal(rtx)
@@ -66,6 +74,8 @@ func (rtx *ResultInfoByAddr) ToJSON() string {
 	}
 	return string(bytes)
 }
+
+// ToMAP ...
 func (rtx *ResultInfoByAddr) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
