@@ -10,6 +10,11 @@ import (
 	"github.com/piqba/wallertme/pkg/logger"
 )
 
+const (
+	TxSender   = "sender"
+	TxReceiver = "receiver"
+)
+
 type ResultLastTxByAddr struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
@@ -69,7 +74,10 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	}
 	//Unix Timestamp to time.Time
 	timeT := time.Unix(timestampUnix, 0)
-	msg := `
+	var msg string
+	if tx.TypeTx == TxSender {
+
+		msg = `
 	📡 Address: %s
 
 	🆔 TxID: %s
@@ -78,7 +86,7 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 
 	💵 Ammount: %v
 
-	↔️ TypeTx: %s
+	⬅️ TypeTx: %s
 
 	💳 From: %s
 
@@ -86,7 +94,28 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 
 	⏰ Time: %s
 
-`
+	`
+	} else {
+
+		msg = `
+		📡 Address: %s
+
+		🆔 TxID: %s
+
+		💰 Balance: %v
+
+		💵 Ammount: %v
+
+		➡️ TypeTx: %s
+
+		💳 From: %s
+
+		💳 TO: %s
+
+		⏰ Time: %s
+
+	`
+	}
 	return fmt.Sprintf(
 		msg,
 		tx.TruncateAddress(tx.Addr),
