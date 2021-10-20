@@ -18,7 +18,7 @@ type Txer interface {
 type ResultLastTxByAddr struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
-	CtbTimeIssued int64  `json:"ctbTimeIssued,omitempty"`
+	CtbTimeIssued string `json:"ctbTimeIssued,omitempty"`
 	FromAddr      string `json:"from_addr,omitempty"`
 	ToAddr        string `json:"to_addr,omitempty"`
 	Balance       string `json:"balance,omitempty"`

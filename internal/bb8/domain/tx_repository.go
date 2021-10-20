@@ -65,6 +65,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 		return exporters.ExportToRedisStream(
 			r.clientRdb,
 			exporters.TXS_STREAM_KEY,
+			"ADA",
 			value,
 		)
 
@@ -77,7 +78,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 	case exporters.POSTGRESQL:
 
 		value := tx.ToJSON()
-		return exporters.ExportToPostgresql(r.clientPgx, int(tx.CtbTimeIssued), value)
+		return exporters.ExportToPostgresql(r.clientPgx, 11, value)
 
 	}
 
