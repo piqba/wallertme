@@ -77,49 +77,15 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = `
-	📡 Address: %s
-
-	🆔 TxID: %s
-
-	💰 Balance: %v
-
-	💵 Ammount: %v
-
-	⬅️ TypeTx: %s
-
-	💳 From: %s
-
-	💳 TO: %s
-
-	⏰ Time: %s
-
-	`
+		msg = "Symbol:%s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n🆔 💰 Balance: %v\n💵 Ammount: %v\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	} else {
-
-		msg = `
-		📡 Address: %s
-
-		🆔 TxID: %s
-
-		💰 Balance: %v
-
-		💵 Ammount: %v
-
-		➡️ TypeTx: %s
-
-		💳 From: %s
-
-		💳 TO: %s
-
-		⏰ Time: %s
-
-	`
+		msg = "Symbol: %s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n💰 Balance: %v\n💵 Ammount: %v\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	}
 	return fmt.Sprintf(
 		msg,
-		tx.TruncateAddress(tx.Addr),
+		"ADA",
 		tx.CtbID,
+		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
 		tx.TypeTx,
