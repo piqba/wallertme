@@ -62,10 +62,10 @@ func ExportToJSON(path, filename string, value interface{}) error {
 }
 
 // ExportToRedisStream ...
-func ExportToRedisStream(rdb *redis.Client, key string, value map[string]interface{}) error {
+func ExportToRedisStream(rdb *redis.Client, key, symbol string, value map[string]interface{}) error {
 
 	err := rdb.XAdd(context.TODO(), &redis.XAddArgs{
-		Stream: key,
+		Stream: key + ":" + symbol,
 		Values: value,
 	}).Err()
 

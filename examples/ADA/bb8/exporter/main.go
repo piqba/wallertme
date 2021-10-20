@@ -99,11 +99,10 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 	addrInfo := getTxByAddress(wallet["address"].(string))
 
 	lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
-
 	tx := domain.ResultLastTxByAddr{
 		Addr:          wallet["address"].(string),
 		CtbID:         lastTX.CtbID,
-		CtbTimeIssued: lastTX.CtbTimeIssued,
+		CtbTimeIssued: fmt.Sprintf("%d", lastTX.CtbTimeIssued),
 		FromAddr:      lastTX.CtbOutputs[0].CtaAddress,
 		ToAddr:        lastTX.CtbOutputs[1].CtaAddress,
 		Balance:       addrInfo.Result.CABalance.GetCoin,
@@ -136,8 +135,10 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 			if err != nil {
 				logger.LogError(err.Error())
 			}
+
 		} else {
-			logger.LogWarn(fmt.Sprintf("NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
+			// logger.LogWarn(fmt.Sprintf("NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
+
 		}
 	case exporters.JSONFILE:
 		err := repo.ExportData(tx)

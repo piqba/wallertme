@@ -18,7 +18,8 @@ const (
 
 var (
 	// ErrRedisDbCheckConn ...
-	ErrRedisDbCheckConn  = errors.NewError("Redis: Fail to check connection")
+	ErrRedisDbCheckConn = errors.NewError("Redis: Fail to check connection")
+	// ErrRedisXADDStreamID ...
 	ErrRedisXADDStreamID = errors.NewError("ERR The ID specified in XADD is equal or smaller than the target stream top item")
 	// RedisDbClient ...
 	// RedisDbClient = GetRedisDbClient()
