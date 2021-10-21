@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"runtime"
 	"time"
 
@@ -39,7 +40,13 @@ func main() {
 		logger.LogError(err.Error())
 	}
 
-	notificationType := notify.DISCORD
+	smtpClient := notify.NewSender(
+		os.Getenv("SMTP_EMAIL_USER"),
+		os.Getenv("SMTP_EMAIL_PASSWORD"),
+	)
+
+	notificationType := notify.SMTP
+
 	var repo domain.TxRepository
 	switch notificationType {
 	case notify.TELEGRAM:
@@ -56,6 +63,13 @@ func main() {
 				Type: notificationType,
 			},
 			discordClient,
+		)
+	case notify.SMTP:
+		repo = domain.NewTxRepository(domain.ExternalOptions{
+			Type:              notificationType,
+			DstNotificationID: 0,
+		},
+			smtpClient,
 		)
 	}
 
