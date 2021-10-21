@@ -1,6 +1,8 @@
 package notify
 
 import (
+	"context"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -19,5 +21,15 @@ func SendMessageTG(bot *tgbotapi.BotAPI, id int64, message string) error {
 	if _, err := bot.Send(msg); err != nil {
 		return err
 	}
+	return nil
+}
+
+func SendMessageDiscord(discordClient DiscordClient, message string) error {
+
+	err := discordClient.PostMessage(context.TODO(), message)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
