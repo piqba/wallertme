@@ -13,8 +13,9 @@ type ExternalOptions struct {
 }
 
 type TxRepository struct {
-	Option   ExternalOptions
-	TGClient *tgbotapi.BotAPI
+	Option        ExternalOptions
+	TGClient      *tgbotapi.BotAPI
+	DiscordClient notify.DiscordClient
 }
 
 func NewTxRepository(options ExternalOptions, clients ...interface{}) TxRepository {
@@ -24,6 +25,8 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 		switch c := c.(type) {
 		case *tgbotapi.BotAPI:
 			repo.TGClient = c
+		case notify.DiscordClient:
+			repo.DiscordClient = c
 		}
 	}
 	return repo
@@ -41,12 +44,24 @@ func (r *TxRepository) SendNotification(data string) error {
 
 	case notify.TELEGRAM:
 
-		notify.SendMessageTG(
+		err = notify.SendMessageTG(
 			r.TGClient,
 			r.Option.DstNotificationID,
 			tx.Hummanify(),
 		)
+		if err != nil {
+			return err
+		}
 
+	case notify.DISCORD:
+
+		err = notify.SendMessageDiscord(
+			r.DiscordClient,
+			tx.EmbedDiscord(),
+		)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

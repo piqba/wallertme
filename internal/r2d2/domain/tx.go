@@ -77,9 +77,48 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "Symbol:%s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n🆔 💰 Balance: %v\n💵 Ammount: %v\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol:%s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n🆔 💰 Balance: %v  ₳\n💵 Ammount: %v ₳\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	} else {
-		msg = "Symbol: %s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n💰 Balance: %v\n💵 Ammount: %v\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol: %s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n💰 Balance: %v ₳\n💵 Ammount: %v ₳\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+	}
+	return fmt.Sprintf(
+		msg,
+		"ADA",
+		tx.CtbID,
+		tx.TruncateAddress(tx.Addr),
+		newBalance,
+		newAmmount,
+		tx.TypeTx,
+		tx.TruncateAddress(tx.FromAddr),
+		tx.TruncateAddress(tx.ToAddr),
+		timeT.String(),
+	)
+}
+
+func (tx *ResultLastTxByAddr) EmbedDiscord() string {
+	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	newBalance := float64(balance) / 1_000_000
+	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	newAmmount := float64(ammount) / 1_000_000
+
+	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	//Unix Timestamp to time.Time
+	timeT := time.Unix(timestampUnix, 0)
+	var msg string
+	if tx.TypeTx == TxSender {
+
+		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s)\n📡 Address: **%s**\n 💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+	} else {
+		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s)\n📡 Address: **%s**\n💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	}
 	return fmt.Sprintf(
 		msg,
