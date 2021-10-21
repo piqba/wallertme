@@ -16,6 +16,7 @@ type TxRepository struct {
 	Option        ExternalOptions
 	TGClient      *tgbotapi.BotAPI
 	DiscordClient notify.DiscordClient
+	SMTPClient    notify.Sender
 }
 
 func NewTxRepository(options ExternalOptions, clients ...interface{}) TxRepository {
@@ -27,6 +28,8 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 			repo.TGClient = c
 		case notify.DiscordClient:
 			repo.DiscordClient = c
+		case notify.Sender:
+			repo.SMTPClient = c
 		}
 	}
 	return repo
@@ -62,6 +65,8 @@ func (r *TxRepository) SendNotification(data string) error {
 		if err != nil {
 			return err
 		}
+	case notify.SMTP:
+		notify.SendMessageSMTP(&r.SMTPClient, tx.SMTPTemplateHTML())
 	}
 	return nil
 }
