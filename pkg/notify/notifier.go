@@ -2,6 +2,7 @@ package notify
 
 import (
 	"context"
+	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -32,4 +33,15 @@ func SendMessageDiscord(discordClient DiscordClient, message string) error {
 	}
 
 	return nil
+}
+
+func SendMessageSMTP(sender *Sender, message string) {
+	//The receiver needs to be in slice as the receive supports multiple receiver
+	Receiver := []string{os.Getenv("SMTP_EMAIL_RECEIVER")}
+
+	Subject := "R2D2 notification service"
+
+	bodyMessage := sender.WriteHTMLEmail(Receiver, Subject, message)
+
+	sender.SendMail(Receiver, Subject, bodyMessage)
 }
