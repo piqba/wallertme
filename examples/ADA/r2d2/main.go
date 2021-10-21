@@ -34,7 +34,12 @@ func main() {
 		Token: "",
 	})
 
-	notificationType := notify.TELEGRAM
+	discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{})
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+
+	notificationType := notify.DISCORD
 	var repo domain.TxRepository
 	switch notificationType {
 	case notify.TELEGRAM:
@@ -44,6 +49,13 @@ func main() {
 				DstNotificationID: 927486129,
 			},
 			tgClientBot,
+		)
+	case notify.DISCORD:
+		repo = domain.NewTxRepository(
+			domain.ExternalOptions{
+				Type: notificationType,
+			},
+			discordClient,
 		)
 	}
 
