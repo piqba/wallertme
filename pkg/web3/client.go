@@ -55,6 +55,6 @@ func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 }
 
 type APICardanoClient interface {
-	// SumaryAddrADA ...
-	SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error)
+	// InfoByAddress ...
+	InfoByAddress(ctx context.Context, address string) (AddrSumary, error)
 }

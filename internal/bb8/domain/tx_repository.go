@@ -92,7 +92,7 @@ func (r *TxRepository) InfoByAddress(address string) (ResultInfoByAddr, error) {
 		return ResultInfoByAddr{}, err
 	}
 
-	sumary, err := cardano.SumaryAddrADA(context.TODO(), address)
+	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
 		return ResultInfoByAddr{}, err
 	}

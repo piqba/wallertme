@@ -154,7 +154,7 @@ func getTxByAddress(address string) web3.AddrSumary {
 		log.Fatal(err)
 	}
 
-	sumary, err := cardano.SumaryAddrADA(context.TODO(), address)
+	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
 		log.Fatal(err)
 	}

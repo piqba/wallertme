@@ -63,7 +63,7 @@ type CtbPut struct {
 	CtaTxIndex int64     `json:"ctaTxIndex"`
 }
 
-func (c *apiClient) SumaryAddrADA(ctx context.Context, address string) (AddrSumary, error) {
+func (c *apiClient) InfoByAddress(ctx context.Context, address string) (AddrSumary, error) {
 	requestUrl, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.server, resourceAddress, address))
 	if err != nil {
 		return AddrSumary{}, err

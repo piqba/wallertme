@@ -19,7 +19,7 @@ func main() {
 	}
 
 	address := "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx"
-	sumary, err := cardano.SumaryAddrADA(context.TODO(), address)
+	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
 		log.Fatal(err)
 	}
