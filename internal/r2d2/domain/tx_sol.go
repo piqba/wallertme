@@ -56,12 +56,12 @@ func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	if err != nil {
 		logger.LogError(err.Error())
 	}
-	newBalance := float64(balance) / 1_000_000
+	newBalance := float64(balance) / 1_000_000_000
 	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
 	}
-	newAmmount := float64(ammount) / 1_000_000
+	newAmmount := float64(ammount) / 1_000_000_000
 
 	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
 	if err != nil {
@@ -72,9 +72,9 @@ func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol:%s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n 💰 Balance: %v  ₳\n💵 Ammount: %v ₳\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol:%s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n 💰 Balance: %v  ◎\n💵 Ammount: %v ◎\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	} else {
-		msg = "💱Symbol: %s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n💰 Balance: %v ₳\n💵 Ammount: %v ₳\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol: %s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n💰 Balance: %v ◎\n💵 Ammount: %v ◎\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	}
 	return fmt.Sprintf(
 		msg,
@@ -95,12 +95,12 @@ func (tx *ResultLastTxSOL) TemplateDiscord() string {
 	if err != nil {
 		logger.LogError(err.Error())
 	}
-	newBalance := float64(balance) / 1_000_000
+	newBalance := float64(balance) / 1_000_000_000
 	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
 	}
-	newAmmount := float64(ammount) / 1_000_000
+	newAmmount := float64(ammount) / 1_000_000_000
 
 	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
 	if err != nil {
@@ -111,9 +111,9 @@ func (tx *ResultLastTxSOL) TemplateDiscord() string {
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n 💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n 💰 Balance: `%v  ◎`\n💵 Ammount: `%v  ◎`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	} else {
-		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n💰 Balance: `%v  ◎`\n💵 Ammount: `%v  ◎`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	}
 	return fmt.Sprintf(
 		msg,
@@ -134,12 +134,12 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 	if err != nil {
 		logger.LogError(err.Error())
 	}
-	newBalance := float64(balance) / 1_000_000
+	newBalance := float64(balance) / 1_000_000_000
 	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
 	}
-	newAmmount := float64(ammount) / 1_000_000
+	newAmmount := float64(ammount) / 1_000_000_000
 
 	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
 	if err != nil {
@@ -163,9 +163,9 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
-		<strong>💰 Balance: %v  ₳</strong>
+		<strong>💰 Balance: %v  ◎</strong>
 		<br>
-		<strong>💵 Ammount: %v ₳</strong>
+		<strong>💵 Ammount: %v ◎</strong>
 		<br>
 		<p>⬅️ TypeTx: %s</p>
 		<br>
@@ -192,9 +192,9 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
-		<strong>💰 Balance: %v  ₳</strong>
+		<strong>💰 Balance: %v  ◎</strong>
 		<br>
-		<strong>💵 Ammount: %v ₳</strong>
+		<strong>💵 Ammount: %v ◎</strong>
 		<br>
 		<p>➡️ TypeTx: %s</p>
 		<br>
