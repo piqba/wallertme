@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -26,7 +25,7 @@ const (
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		logger.LogError(err.Error())
+		logger.LogError(errors.Errorf("main:%s", err).Error())
 	}
 	numcpu := runtime.NumCPU()
 	runtime.GOMAXPROCS(numcpu) // Try to use all available CPUs.
@@ -56,7 +55,7 @@ func main() {
 
 	signal.Notify(quit, os.Interrupt)
 
-	exporterType := exporters.JSONFILE
+	exporterType := exporters.REDIS
 	var repo domain.TxRepository
 	switch exporterType {
 	case exporters.REDIS:
@@ -67,7 +66,7 @@ func main() {
 	case exporters.POSTGRESQL:
 		pg, err := exporters.PostgreSQLConnection()
 		if err != nil {
-			logger.LogError(err.Error())
+			logger.LogError(errors.Errorf("main:%s", err).Error())
 		}
 		pg.MustExec(constants.SchemaTXS)
 		repo = domain.NewTxRepository(exporters.POSTGRESQL, pg)
@@ -102,8 +101,8 @@ func main() {
 }
 
 func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType string) {
-
-	switch wallet["symbol"].(string) {
+	symbol := wallet["symbol"].(string)
+	switch symbol {
 	case "ADA":
 		addrInfo := lastTXForADA(wallet["address"].(string))
 
@@ -122,7 +121,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 
 			lastTXFromRdb, err := repo.Get(context.TODO(), wallet["address"].(string))
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("main:%s", err).Error())
 			}
 			if tx.CtbID != lastTXFromRdb {
 
@@ -132,24 +131,24 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx)
+				err := repo.ExportData(tx, symbol)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
 						return
 					}
-					logger.LogError(err.Error())
+					logger.LogError(errors.Errorf("main:%s", err).Error())
 				}
 				err = repo.Set(context.TODO(), wallet["address"].(string), tx.CtbID, 0)
 				if err != nil {
-					logger.LogError(err.Error())
+					logger.LogError(errors.Errorf("main:%s", err).Error())
 				}
 
 			}
 		case exporters.JSONFILE:
-			err := repo.ExportData(tx)
+			err := repo.ExportData(tx, symbol)
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("main:%s", err).Error())
 			}
 		}
 	case "SOL":
@@ -173,7 +172,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 
 			lastTXFromRdb, err := repo.Get(context.TODO(), wallet["address"].(string))
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("main:%s", err).Error())
 			}
 			if tx.TxID != lastTXFromRdb {
 
@@ -183,24 +182,24 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx)
+				err := repo.ExportData(tx, symbol)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
-						logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
+						logger.LogWarn(errors.Errorf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr), err).Error())
 						return
 					}
-					logger.LogError(err.Error())
+					logger.LogError(errors.Errorf("main:%s", err).Error())
 				}
 				err = repo.Set(context.TODO(), wallet["address"].(string), tx.TxID, 0)
 				if err != nil {
-					logger.LogError(err.Error())
+					logger.LogError(errors.Errorf("main:%s", err).Error())
 				}
 
 			}
 		case exporters.JSONFILE:
-			err := repo.ExportData(tx)
+			err := repo.ExportData(tx, symbol)
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("main:%s", err).Error())
 			}
 		}
 	}
@@ -210,12 +209,12 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 func lastTXForADA(address string) web3.AddrSumary {
 	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
 	if err != nil {
-		log.Fatal(err)
+		logger.LogError(errors.Errorf("main:%s", err).Error())
 	}
 
 	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
-		log.Fatal(err)
+		logger.LogError(errors.Errorf("main:%s", err).Error())
 	}
 
 	return sumary
