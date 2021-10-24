@@ -10,24 +10,19 @@ import (
 	"github.com/piqba/wallertme/pkg/logger"
 )
 
-const (
-	TxSender   = "sender"
-	TxReceiver = "receiver"
-)
-
-type ResultLastTxByAddr struct {
-	Addr          string `json:"addr,omitempty"`
-	CtbID         string `json:"ctbId,omitempty"`
-	CtbTimeIssued string `json:"ctbTimeIssued,omitempty"`
-	FromAddr      string `json:"from_addr,omitempty"`
-	ToAddr        string `json:"to_addr,omitempty"`
-	Balance       string `json:"balance,omitempty"`
-	Ammount       string `json:"ammount,omitempty"`
-	TypeTx        string `json:"type_tx,omitempty"`
+type ResultLastTxSOL struct {
+	Addr      string `json:"addr,omitempty"`
+	TxID      string `json:"tx_id,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+	FromAddr  string `json:"from_addr,omitempty"`
+	ToAddr    string `json:"to_addr,omitempty"`
+	Balance   string `json:"balance,omitempty"`
+	Ammount   string `json:"ammount,omitempty"`
+	TypeTx    string `json:"type_tx,omitempty"`
 }
 
 // ToJSON ...
-func (rtx *ResultLastTxByAddr) ToJSON() string {
+func (rtx *ResultLastTxSOL) ToJSON() string {
 	bytes, err := json.Marshal(rtx)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -35,7 +30,7 @@ func (rtx *ResultLastTxByAddr) ToJSON() string {
 	return string(bytes)
 }
 
-func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err error) {
+func (rtx *ResultLastTxSOL) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
 	if err != nil {
@@ -49,14 +44,14 @@ func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err er
 }
 
 // TruncateAddress ...
-func (rtx *ResultLastTxByAddr) TruncateAddress(address string) string {
-	prefix := address[0:16]
-	sufix := address[len(address)-16:]
+func (rtx *ResultLastTxSOL) TruncateAddress(address string) string {
+	prefix := address[0:8]
+	sufix := address[len(address)-8:]
 	cleanAddress := prefix + "..." + sufix
 	return cleanAddress
 }
 
-func (tx *ResultLastTxByAddr) Hummanify() string {
+func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -68,7 +63,7 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	}
 	newAmmount := float64(ammount) / 1_000_000
 
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
+	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
 	}
@@ -77,14 +72,14 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol:%s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n 💰 Balance: %v  ₳\n💵 Ammount: %v ₳\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol:%s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n 💰 Balance: %v  ₳\n💵 Ammount: %v ₳\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	} else {
-		msg = "💱Symbol: %s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n💰 Balance: %v ₳\n💵 Ammount: %v ₳\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol: %s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n💰 Balance: %v ₳\n💵 Ammount: %v ₳\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	}
 	return fmt.Sprintf(
 		msg,
-		"ADA",
-		tx.CtbID,
+		"SOL",
+		tx.TxID,
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -95,7 +90,7 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	)
 }
 
-func (tx *ResultLastTxByAddr) EmbedDiscord() string {
+func (tx *ResultLastTxSOL) TemplateDiscord() string {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -107,7 +102,7 @@ func (tx *ResultLastTxByAddr) EmbedDiscord() string {
 	}
 	newAmmount := float64(ammount) / 1_000_000
 
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
+	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
 	}
@@ -116,14 +111,14 @@ func (tx *ResultLastTxByAddr) EmbedDiscord() string {
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s)\n📡 Address: **%s**\n 💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n 💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	} else {
-		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s)\n📡 Address: **%s**\n💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	}
 	return fmt.Sprintf(
 		msg,
-		"ADA",
-		tx.CtbID,
+		"SOL",
+		tx.TxID,
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -134,7 +129,7 @@ func (tx *ResultLastTxByAddr) EmbedDiscord() string {
 	)
 }
 
-func (tx *ResultLastTxByAddr) SMTPTemplateHTML() string {
+func (tx *ResultLastTxSOL) TemplateSMTP() string {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -146,7 +141,7 @@ func (tx *ResultLastTxByAddr) SMTPTemplateHTML() string {
 	}
 	newAmmount := float64(ammount) / 1_000_000
 
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
+	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
 	}
@@ -164,7 +159,7 @@ func (tx *ResultLastTxByAddr) SMTPTemplateHTML() string {
 		<body>
 		<p>💱Symbol: %s</p>
 		<br>
-		<a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s">🆔 show TxID</a>
+		<a href="https://explorer.solana.com/tx/%s?cluster=devnet">🆔 show TxID</a>
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
@@ -193,7 +188,7 @@ func (tx *ResultLastTxByAddr) SMTPTemplateHTML() string {
 		<body>
 		<p>💱Symbol: %s</p>
 		<br>
-		<a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s">🆔 show TxID</a>
+		<a href="https://explorer.solana.com/tx/%s?cluster=devnet">🆔 show TxID</a>
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
@@ -215,8 +210,8 @@ func (tx *ResultLastTxByAddr) SMTPTemplateHTML() string {
 	}
 	return fmt.Sprintf(
 		msg,
-		"ADA",
-		tx.CtbID,
+		"SOL",
+		tx.TxID,
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
