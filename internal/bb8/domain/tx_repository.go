@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -47,57 +48,73 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 	return repo
 }
 
-func (r *TxRepository) ExportData(data interface{}) error {
-	tx := data.(ResultLastTxByAddr)
+func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 
-	switch r.exporterType {
-	case exporters.JSONFILE:
-		fileName := fmt.Sprintf("export_%d.json", time.Now().UnixNano())
+	t := reflect.TypeOf(data)
+	if t == reflect.TypeOf(ResultLastTxADA{}) {
 
-		return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
-	case exporters.REDIS:
+		tx := data.(ResultLastTxADA)
 
-		value, err := tx.ToMAP()
-		if err != nil {
-			return err
+		switch r.exporterType {
+		case exporters.JSONFILE:
+			fileName := fmt.Sprintf("export_%s_%d.json", symbol, time.Now().UnixNano())
+
+			return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
+		case exporters.REDIS:
+
+			value, err := tx.ToMAP()
+			if err != nil {
+				return err
+			}
+
+			return exporters.ExportToRedisStream(
+				r.clientRdb,
+				exporters.TXS_STREAM_KEY,
+				symbol,
+				value,
+			)
 		}
+	} else if t == reflect.TypeOf(ResultLastTxSOL{}) {
+		tx := data.(ResultLastTxSOL)
 
-		return exporters.ExportToRedisStream(
-			r.clientRdb,
-			exporters.TXS_STREAM_KEY,
-			"ADA",
-			value,
-		)
+		switch r.exporterType {
+		case exporters.JSONFILE:
+			fileName := fmt.Sprintf("export_%s_%d.json", symbol, time.Now().UnixNano())
 
-	case exporters.KAFKA:
+			return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
+		case exporters.REDIS:
 
-		value := tx.ToJSON()
+			value, err := tx.ToMAP()
+			if err != nil {
+				return err
+			}
 
-		return exporters.ExportTokafka(r.clientKafka, exporters.TXS_TOPIC_KEY, value)
+			return exporters.ExportToRedisStream(
+				r.clientRdb,
+				exporters.TXS_STREAM_KEY,
+				symbol,
+				value,
+			)
 
-	case exporters.POSTGRESQL:
-
-		value := tx.ToJSON()
-		return exporters.ExportToPostgresql(r.clientPgx, 11, value)
-
+		}
 	}
 
 	return nil
 }
 
-func (r *TxRepository) InfoByAddress(address string) (ResultInfoByAddr, error) {
+func (r *TxRepository) InfoByAddress(address string) (ResultInfoForADA, error) {
 
 	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
 	if err != nil {
-		return ResultInfoByAddr{}, err
+		return ResultInfoForADA{}, err
 	}
 
 	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
-		return ResultInfoByAddr{}, err
+		return ResultInfoForADA{}, err
 	}
 
-	return ResultInfoByAddr{
+	return ResultInfoForADA{
 		Address:   address,
 		Type:      sumary.Result.CAType,
 		BlockNO:   sumary.Result.CAChainTip.CTBlockNo,

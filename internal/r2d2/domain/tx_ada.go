@@ -15,7 +15,7 @@ const (
 	TxReceiver = "receiver"
 )
 
-type ResultLastTxByAddr struct {
+type ResultLastTxADA struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
 	CtbTimeIssued string `json:"ctbTimeIssued,omitempty"`
@@ -27,7 +27,7 @@ type ResultLastTxByAddr struct {
 }
 
 // ToJSON ...
-func (rtx *ResultLastTxByAddr) ToJSON() string {
+func (rtx *ResultLastTxADA) ToJSON() string {
 	bytes, err := json.Marshal(rtx)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -35,7 +35,7 @@ func (rtx *ResultLastTxByAddr) ToJSON() string {
 	return string(bytes)
 }
 
-func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err error) {
+func (rtx *ResultLastTxADA) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
 	if err != nil {
@@ -49,14 +49,14 @@ func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err er
 }
 
 // TruncateAddress ...
-func (rtx *ResultLastTxByAddr) TruncateAddress(address string) string {
+func (rtx *ResultLastTxADA) TruncateAddress(address string) string {
 	prefix := address[0:16]
 	sufix := address[len(address)-16:]
 	cleanAddress := prefix + "..." + sufix
 	return cleanAddress
 }
 
-func (tx *ResultLastTxByAddr) Hummanify() string {
+func (tx *ResultLastTxADA) TemplateTelegram() string {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -95,7 +95,7 @@ func (tx *ResultLastTxByAddr) Hummanify() string {
 	)
 }
 
-func (tx *ResultLastTxByAddr) EmbedDiscord() string {
+func (tx *ResultLastTxADA) TemplateDiscord() string {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -134,7 +134,7 @@ func (tx *ResultLastTxByAddr) EmbedDiscord() string {
 	)
 }
 
-func (tx *ResultLastTxByAddr) SMTPTemplateHTML() string {
+func (tx *ResultLastTxADA) TemplateSMTP() string {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())

@@ -18,6 +18,11 @@ import (
 	"github.com/piqba/wallertme/pkg/notify"
 )
 
+var (
+	ADA = exporters.TXS_STREAM_KEY + ":" + "ADA"
+	SOL = exporters.TXS_STREAM_KEY + ":" + "SOL"
+)
+
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -30,22 +35,26 @@ func init() {
 func main() {
 	log.Println("Consumer started")
 	redisDbClient := exporters.GetRedisDbClient()
+	// telegram client
 	tgClientBot := notify.GetTgBot(notify.TgBotOption{
 		Debug: false,
 		Token: "",
 	})
 
+	// discord client
 	discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{})
 	if err != nil {
 		logger.LogError(err.Error())
 	}
 
+	// smtp client
 	smtpClient := notify.NewSender(
 		os.Getenv("SMTP_EMAIL_USER"),
 		os.Getenv("SMTP_EMAIL_PASSWORD"),
 	)
 
-	notificationType := notify.SMTP
+	// notification type
+	notificationType := notify.TELEGRAM
 
 	var repo domain.TxRepository
 	switch notificationType {
@@ -73,10 +82,9 @@ func main() {
 		)
 	}
 
-	streamADA := exporters.TXS_STREAM_KEY + ":" + "ADA"
-	streams := []string{streamADA}
+	streams := []string{ADA, SOL}
 	var ids []string
-	consumersGroup := "cardano-group"
+	consumersGroup := "r2d2-consumer"
 	for _, v := range streams {
 		ids = append(ids, ">")
 		err := redisDbClient.XGroupCreate(context.TODO(), v, consumersGroup, "0").Err()
@@ -101,15 +109,19 @@ func main() {
 			log.Fatal(err)
 		}
 
-		switch entries[0].Stream {
-		case streamADA:
-			Exec(redisDbClient, consumersGroup, entries[0], repo)
+		for _, it := range entries {
+			Exec(redisDbClient, consumersGroup, it, repo)
 		}
 
 	}
 }
 
-func Exec(rdb *redis.Client, consumersGroup string, stream redis.XStream, repo domain.TxRepository) {
+func Exec(
+	rdb *redis.Client,
+	consumersGroup string,
+	stream redis.XStream,
+	repo domain.TxRepository,
+) {
 	for i := 0; i < len(stream.Messages); i++ {
 		messageID := stream.Messages[i].ID
 		values := stream.Messages[i].Values
@@ -124,10 +136,31 @@ func Exec(rdb *redis.Client, consumersGroup string, stream redis.XStream, repo d
 			consumersGroup,
 			messageID,
 		)
-		// sen data to notification provider
-		err = repo.SendNotification(string(bytes))
-		if err != nil {
-			logger.LogError(err.Error())
+
+		switch stream.Stream {
+		case ADA:
+			tx := domain.ResultLastTxADA{}
+			err := json.Unmarshal(bytes, &tx)
+			if err != nil {
+				logger.LogError(err.Error())
+			}
+			// sen data to notification provider
+			err = repo.SendNotification(tx)
+			if err != nil {
+				logger.LogError(err.Error())
+			}
+		case SOL:
+			tx := domain.ResultLastTxSOL{}
+			err := json.Unmarshal(bytes, &tx)
+			if err != nil {
+				logger.LogError(err.Error())
+			}
+			// sen data to notification provider
+			err = repo.SendNotification(tx)
+			if err != nil {
+				logger.LogError(err.Error())
+			}
 		}
+
 	}
 }

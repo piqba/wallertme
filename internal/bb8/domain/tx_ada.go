@@ -1,21 +1,13 @@
 package bb8
 
 import (
-	"context"
 	"encoding/json"
 	"log"
-	"time"
 
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
-type Txer interface {
-	InfoByAddress(address string) (ResultInfoByAddr, error)
-	Set(ctx context.Context, key, value string, expiration time.Duration) error
-	Get(ctx context.Context, key string) (string, error)
-}
-
-type ResultLastTxByAddr struct {
+type ResultLastTxADA struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
 	CtbTimeIssued string `json:"ctbTimeIssued,omitempty"`
@@ -27,7 +19,7 @@ type ResultLastTxByAddr struct {
 }
 
 // ToJSON ...
-func (rtx *ResultLastTxByAddr) ToJSON() string {
+func (rtx *ResultLastTxADA) ToJSON() string {
 	bytes, err := json.Marshal(rtx)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -35,7 +27,7 @@ func (rtx *ResultLastTxByAddr) ToJSON() string {
 	return string(bytes)
 }
 
-func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err error) {
+func (rtx *ResultLastTxADA) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
 	if err != nil {
@@ -49,15 +41,15 @@ func (rtx *ResultLastTxByAddr) ToMAP() (toHashMap map[string]interface{}, err er
 }
 
 // TruncateAddress ...
-func (rtx *ResultLastTxByAddr) TruncateAddress(address string) string {
+func (rtx *ResultLastTxADA) TruncateAddress(address string) string {
 	prefix := address[0:16]
 	sufix := address[len(address)-16:]
 	cleanAddress := prefix + "..." + sufix
 	return cleanAddress
 }
 
-// ResultInfoByAddr ...
-type ResultInfoByAddr struct {
+// ResultInfoForADA ...
+type ResultInfoForADA struct {
 	Address   string          `json:"address,omitempty"`
 	Type      string          `json:"type,omitempty"`
 	BlockNO   int64           `json:"block_no,omitempty"`
@@ -71,7 +63,7 @@ type ResultInfoByAddr struct {
 }
 
 // ToJSON ...
-func (rtx *ResultInfoByAddr) ToJSON() string {
+func (rtx *ResultInfoForADA) ToJSON() string {
 	bytes, err := json.Marshal(rtx)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -80,7 +72,7 @@ func (rtx *ResultInfoByAddr) ToJSON() string {
 }
 
 // ToMAP ...
-func (rtx *ResultInfoByAddr) ToMAP() (toHashMap map[string]interface{}, err error) {
+func (rtx *ResultInfoForADA) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
 	if err != nil {

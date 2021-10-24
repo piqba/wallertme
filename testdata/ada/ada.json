@@ -1,0 +1,157 @@
+{
+  "Right": {
+    "caAddress": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+    "caType": "CPubKeyAddress",
+    "caChainTip": {
+      "ctBlockNo": 3000011,
+      "ctSlotNo": 40134467,
+      "ctBlockHash": "5bfa2e9a7ba085dc60f9788b048af4dc5bc4abeafc2e19a8b5d968133946d884"
+    },
+    "caTxNum": 3,
+    "caBalance": {
+      "getCoin": "499831683"
+    },
+    "caTotalInput": {
+      "getCoin": "1499831683"
+    },
+    "caTotalOutput": {
+      "getCoin": "1000000000"
+    },
+    "caTotalFee": {
+      "getCoin": "511859"
+    },
+    "caTxList": [
+      {
+        "ctbId": "a27e2953560594f8e2e78169ce8e63e706aa1d9f621b73d550d610b422be4c3a",
+        "ctbTimeIssued": 1634485508,
+        "ctbInputs": [
+          {
+            "ctaAddress": "addr_test1qz9jgzey24cnm84y23754pysvt3x3ukljxt9xvk2q5wepucxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flkns6areqc",
+            "ctaAmount": {
+              "getCoin": "9237621050319"
+            },
+            "ctaTxHash": "ee0a44e0630ed77c30034882694713a6e0b734fcc5dbed679e9d2ffa4a98ecee",
+            "ctaTxIndex": 1
+          },
+          {
+            "ctaAddress": "addr_test1qqr585tvlc7ylnqvz8pyqwauzrdu0mxag3m7q56grgmgu7sxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flknswgndm3",
+            "ctaAmount": {
+              "getCoin": "398495049"
+            },
+            "ctaTxHash": "9b7d8103e23724ee443ba8594a7b42237df5947c49d11b97c61d29a94366d332",
+            "ctaTxIndex": 0
+          }
+        ],
+        "ctbOutputs": [
+          {
+            "ctaAddress": "addr_test1qrxhtaptv8ye2ld40jpjuga0kl7tqay9g3kz3wgkaap3kqcxu2hyfhlkwuxupa9d5085eunq2qywy7hvmvej456flkns8qqpxp",
+            "ctaAmount": {
+              "getCoin": "9237019370143"
+            },
+            "ctaTxHash": "a27e2953560594f8e2e78169ce8e63e706aa1d9f621b73d550d610b422be4c3a",
+            "ctaTxIndex": 1
+          },
+          {
+            "ctaAddress": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+            "ctaAmount": {
+              "getCoin": "1000000000"
+            },
+            "ctaTxHash": "a27e2953560594f8e2e78169ce8e63e706aa1d9f621b73d550d610b422be4c3a",
+            "ctaTxIndex": 0
+          }
+        ],
+        "ctbInputSum": {
+          "getCoin": "9238019545368"
+        },
+        "ctbOutputSum": {
+          "getCoin": "9238019370143"
+        },
+        "ctbFees": {
+          "getCoin": "175225"
+        }
+      },
+      {
+        "ctbId": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+        "ctbTimeIssued": 1634503062,
+        "ctbInputs": [
+          {
+            "ctaAddress": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+            "ctaAmount": {
+              "getCoin": "1000000000"
+            },
+            "ctaTxHash": "a27e2953560594f8e2e78169ce8e63e706aa1d9f621b73d550d610b422be4c3a",
+            "ctaTxIndex": 0
+          }
+        ],
+        "ctbOutputs": [
+          {
+            "ctaAddress": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+            "ctaAmount": {
+              "getCoin": "499831683"
+            },
+            "ctaTxHash": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+            "ctaTxIndex": 1
+          },
+          {
+            "ctaAddress": "addr_test1qq5287luxzj5l4lequrqdp5ln76ver4uls3z0m5ykr5gqsv0vxzrwcq5dmmn9e09rvgttzgrngmpxkguy7220r0u0ljqzuww7g",
+            "ctaAmount": {
+              "getCoin": "500000000"
+            },
+            "ctaTxHash": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+            "ctaTxIndex": 0
+          }
+        ],
+        "ctbInputSum": {
+          "getCoin": "1000000000"
+        },
+        "ctbOutputSum": {
+          "getCoin": "999831683"
+        },
+        "ctbFees": {
+          "getCoin": "168317"
+        }
+      },
+      {
+        "ctbId": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+        "ctbTimeIssued": 1634503062,
+        "ctbInputs": [
+          {
+            "ctaAddress": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+            "ctaAmount": {
+              "getCoin": "1000000000"
+            },
+            "ctaTxHash": "a27e2953560594f8e2e78169ce8e63e706aa1d9f621b73d550d610b422be4c3a",
+            "ctaTxIndex": 0
+          }
+        ],
+        "ctbOutputs": [
+          {
+            "ctaAddress": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+            "ctaAmount": {
+              "getCoin": "499831683"
+            },
+            "ctaTxHash": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+            "ctaTxIndex": 1
+          },
+          {
+            "ctaAddress": "addr_test1qq5287luxzj5l4lequrqdp5ln76ver4uls3z0m5ykr5gqsv0vxzrwcq5dmmn9e09rvgttzgrngmpxkguy7220r0u0ljqzuww7g",
+            "ctaAmount": {
+              "getCoin": "500000000"
+            },
+            "ctaTxHash": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+            "ctaTxIndex": 0
+          }
+        ],
+        "ctbInputSum": {
+          "getCoin": "1000000000"
+        },
+        "ctbOutputSum": {
+          "getCoin": "999831683"
+        },
+        "ctbFees": {
+          "getCoin": "168317"
+        }
+      }
+    ]
+  }
+}

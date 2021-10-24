@@ -58,3 +58,32 @@ type APICardanoClient interface {
 	// InfoByAddress ...
 	InfoByAddress(ctx context.Context, address string) (AddrSumary, error)
 }
+
+// NewAPISolanaClient ...
+func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
+	if options.Server == "" {
+		options.Server = SolanaDevNet
+	}
+
+	retryclient := retryablehttp.NewClient()
+	retryclient.Logger = nil
+
+	if options.MaxRoutines == 0 {
+		options.MaxRoutines = 10
+	}
+
+	client := &apiClient{
+		server:   options.Server,
+		client:   retryclient,
+		routines: options.MaxRoutines,
+	}
+
+	return client, nil
+}
+
+type APISolanaClient interface {
+	// LastTxByAddress ...
+	LastTxByAddress(ctx context.Context, payload PayloadReqJSONRPC) (LastTxByAddr, error)
+	// InfoByTx ...
+	InfoByTx(ctx context.Context, payload PayloadReqJSONRPC) (TxInfo, error)
+}

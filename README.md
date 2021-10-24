@@ -17,5 +17,12 @@ DB_MAX_LIFETIME_CONNECTIONS=2
 # REDIS
 REDIS_URI=localhost:6379
 REDIS_PASS=""
-# Kafka
+# KAFKA_HOST="localhost:9092"
+# notification providers
+SMTP_EMAIL_RECEIVER=test@gmail.com
+SMTP_EMAIL_USER=test@gmail.com
+SMTP_EMAIL_PASSWORD="password"
+BOT_TOKEN=token
+DISCORD_WEBHOOK=https://discordapp.com/api/webhooks/idhook
+
 ```

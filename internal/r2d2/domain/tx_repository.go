@@ -1,7 +1,7 @@
 package r2d2
 
 import (
-	"encoding/json"
+	"reflect"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/piqba/wallertme/pkg/notify"
@@ -35,38 +35,65 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 	return repo
 }
 
-func (r *TxRepository) SendNotification(data string) error {
-	tx := ResultLastTxByAddr{}
+func (r *TxRepository) SendNotification(data interface{}) error {
 
-	err := json.Unmarshal([]byte(data), &tx)
-	if err != nil {
-		return err
+	t := reflect.TypeOf(data)
+	if t == reflect.TypeOf(ResultLastTxADA{}) {
+
+		tx := data.(ResultLastTxADA)
+		switch r.Option.Type {
+
+		case notify.TELEGRAM:
+
+			err := notify.SendMessageTG(
+				r.TGClient,
+				r.Option.DstNotificationID,
+				tx.TemplateTelegram(),
+			)
+			if err != nil {
+				return err
+			}
+
+		case notify.DISCORD:
+
+			err := notify.SendMessageDiscord(
+				r.DiscordClient,
+				tx.TemplateDiscord(),
+			)
+			if err != nil {
+				return err
+			}
+		case notify.SMTP:
+			notify.SendMessageSMTP(&r.SMTPClient, tx.TemplateSMTP())
+		}
+	} else if t == reflect.TypeOf(ResultLastTxSOL{}) {
+		tx := data.(ResultLastTxSOL)
+		switch r.Option.Type {
+
+		case notify.TELEGRAM:
+
+			err := notify.SendMessageTG(
+				r.TGClient,
+				r.Option.DstNotificationID,
+				tx.TemplateTelegram(),
+			)
+			if err != nil {
+				return err
+			}
+
+		case notify.DISCORD:
+
+			err := notify.SendMessageDiscord(
+				r.DiscordClient,
+				tx.TemplateDiscord(),
+			)
+			if err != nil {
+				return err
+			}
+		case notify.SMTP:
+			notify.SendMessageSMTP(&r.SMTPClient, tx.TemplateSMTP())
+		}
 	}
 
-	switch r.Option.Type {
-
-	case notify.TELEGRAM:
-
-		err = notify.SendMessageTG(
-			r.TGClient,
-			r.Option.DstNotificationID,
-			tx.Hummanify(),
-		)
-		if err != nil {
-			return err
-		}
-
-	case notify.DISCORD:
-
-		err = notify.SendMessageDiscord(
-			r.DiscordClient,
-			tx.EmbedDiscord(),
-		)
-		if err != nil {
-			return err
-		}
-	case notify.SMTP:
-		notify.SendMessageSMTP(&r.SMTPClient, tx.SMTPTemplateHTML())
-	}
 	return nil
 }
