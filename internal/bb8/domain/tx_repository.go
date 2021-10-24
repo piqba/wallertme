@@ -48,7 +48,7 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 	return repo
 }
 
-func (r *TxRepository) ExportData(data interface{}) error {
+func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 
 	t := reflect.TypeOf(data)
 	if t == reflect.TypeOf(ResultLastTxADA{}) {
@@ -57,7 +57,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 
 		switch r.exporterType {
 		case exporters.JSONFILE:
-			fileName := fmt.Sprintf("export_%d.json", time.Now().UnixNano())
+			fileName := fmt.Sprintf("export_%s_%d.json", symbol, time.Now().UnixNano())
 
 			return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
 		case exporters.REDIS:
@@ -70,7 +70,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 			return exporters.ExportToRedisStream(
 				r.clientRdb,
 				exporters.TXS_STREAM_KEY,
-				"ADA",
+				symbol,
 				value,
 			)
 		}
@@ -79,7 +79,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 
 		switch r.exporterType {
 		case exporters.JSONFILE:
-			fileName := fmt.Sprintf("export_%d.json", time.Now().UnixNano())
+			fileName := fmt.Sprintf("export_%s_%d.json", symbol, time.Now().UnixNano())
 
 			return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
 		case exporters.REDIS:
@@ -92,7 +92,7 @@ func (r *TxRepository) ExportData(data interface{}) error {
 			return exporters.ExportToRedisStream(
 				r.clientRdb,
 				exporters.TXS_STREAM_KEY,
-				"ADA",
+				symbol,
 				value,
 			)
 
