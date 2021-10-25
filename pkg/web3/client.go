@@ -35,7 +35,7 @@ type APIClientOptions struct {
 // NewAPICardanoClient ...
 func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	if options.Server == "" {
-		options.Server = CardanoTestNet
+		options.Server = CardanoTestNet.ApiURL
 	}
 
 	retryclient := retryablehttp.NewClient()
@@ -62,7 +62,7 @@ type APICardanoClient interface {
 // NewAPISolanaClient ...
 func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
 	if options.Server == "" {
-		options.Server = SolanaDevNet
+		options.Server = SolanaDevNet.ApiURL
 	}
 
 	retryclient := retryablehttp.NewClient()
