@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/piqba/wallertme/pkg/logger"
+	"github.com/piqba/wallertme/pkg/web3"
 )
 
 const (
@@ -34,7 +35,26 @@ func (rtx *ResultLastTxADA) ToJSON() string {
 	}
 	return string(bytes)
 }
+func (tx *ResultLastTxADA) parseField() (float64, float64, time.Time) {
+	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	newBalance := float64(balance) / 1_000_000
+	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	newAmmount := float64(ammount) / 1_000_000
 
+	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	//Unix Timestamp to time.Time
+	timeT := time.Unix(timestampUnix, 0)
+	return newBalance, newAmmount, timeT
+}
 func (rtx *ResultLastTxADA) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
@@ -57,34 +77,18 @@ func (rtx *ResultLastTxADA) TruncateAddress(address string) string {
 }
 
 func (tx *ResultLastTxADA) TemplateTelegram() string {
-	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newBalance := float64(balance) / 1_000_000
-	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newAmmount := float64(ammount) / 1_000_000
-
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	//Unix Timestamp to time.Time
-	timeT := time.Unix(timestampUnix, 0)
+	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol:%s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n 💰 Balance: %v  ₳\n💵 Ammount: %v ₳\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol:%s\nTxID: %s\n📡 Address: %s\n 💰 Balance: %v  ₳\n💵 Ammount: %v ₳\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	} else {
-		msg = "💱Symbol: %s\nTxID: https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s\n📡 Address: %s\n💰 Balance: %v ₳\n💵 Ammount: %v ₳\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol: %s\nTxID: %s\n📡 Address: %s\n💰 Balance: %v ₳\n💵 Ammount: %v ₳\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	}
 	return fmt.Sprintf(
 		msg,
 		"ADA",
-		tx.CtbID,
+		fmt.Sprintf(web3.CardanoTestNet.ExplorerURL, tx.CtbID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -96,34 +100,18 @@ func (tx *ResultLastTxADA) TemplateTelegram() string {
 }
 
 func (tx *ResultLastTxADA) TemplateDiscord() string {
-	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newBalance := float64(balance) / 1_000_000
-	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newAmmount := float64(ammount) / 1_000_000
-
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	//Unix Timestamp to time.Time
-	timeT := time.Unix(timestampUnix, 0)
+	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s)\n📡 Address: **%s**\n 💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](%s)\n📡 Address: **%s**\n 💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	} else {
-		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s)\n📡 Address: **%s**\n💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](%s)\n📡 Address: **%s**\n💰 Balance: `%v  ₳`\n💵 Ammount: `%v  ₳`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	}
 	return fmt.Sprintf(
 		msg,
 		"ADA",
-		tx.CtbID,
+		fmt.Sprintf(web3.CardanoTestNet.ExplorerURL, tx.CtbID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -135,23 +123,7 @@ func (tx *ResultLastTxADA) TemplateDiscord() string {
 }
 
 func (tx *ResultLastTxADA) TemplateSMTP() string {
-	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newBalance := float64(balance) / 1_000_000
-	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newAmmount := float64(ammount) / 1_000_000
-
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	//Unix Timestamp to time.Time
-	timeT := time.Unix(timestampUnix, 0)
+	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
 	if tx.TypeTx == TxSender {
 
@@ -164,7 +136,7 @@ func (tx *ResultLastTxADA) TemplateSMTP() string {
 		<body>
 		<p>💱Symbol: %s</p>
 		<br>
-		<a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s">🆔 show TxID</a>
+		<a href="%s">🆔 show TxID</a>
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
@@ -193,7 +165,7 @@ func (tx *ResultLastTxADA) TemplateSMTP() string {
 		<body>
 		<p>💱Symbol: %s</p>
 		<br>
-		<a href="https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s">🆔 show TxID</a>
+		<a href="%s">🆔 show TxID</a>
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
@@ -216,7 +188,7 @@ func (tx *ResultLastTxADA) TemplateSMTP() string {
 	return fmt.Sprintf(
 		msg,
 		"ADA",
-		tx.CtbID,
+		fmt.Sprintf(web3.CardanoTestNet.ExplorerURL, tx.CtbID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,

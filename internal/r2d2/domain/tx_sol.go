@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/piqba/wallertme/pkg/logger"
+	"github.com/piqba/wallertme/pkg/web3"
 )
 
 type ResultLastTxSOL struct {
@@ -22,17 +23,17 @@ type ResultLastTxSOL struct {
 }
 
 // ToJSON ...
-func (rtx *ResultLastTxSOL) ToJSON() string {
-	bytes, err := json.Marshal(rtx)
+func (tx *ResultLastTxSOL) ToJSON() string {
+	bytes, err := json.Marshal(tx)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
 	return string(bytes)
 }
 
-func (rtx *ResultLastTxSOL) ToMAP() (toHashMap map[string]interface{}, err error) {
+func (tx *ResultLastTxSOL) ToMAP() (toHashMap map[string]interface{}, err error) {
 
-	fromStruct, err := json.Marshal(rtx)
+	fromStruct, err := json.Marshal(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -44,14 +45,14 @@ func (rtx *ResultLastTxSOL) ToMAP() (toHashMap map[string]interface{}, err error
 }
 
 // TruncateAddress ...
-func (rtx *ResultLastTxSOL) TruncateAddress(address string) string {
+func (tx *ResultLastTxSOL) TruncateAddress(address string) string {
 	prefix := address[0:8]
 	sufix := address[len(address)-8:]
 	cleanAddress := prefix + "..." + sufix
 	return cleanAddress
 }
 
-func (tx *ResultLastTxSOL) TemplateTelegram() string {
+func (tx *ResultLastTxSOL) parseField() (float64, float64, time.Time) {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -69,17 +70,22 @@ func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	}
 	//Unix Timestamp to time.Time
 	timeT := time.Unix(timestampUnix, 0)
+	return newBalance, newAmmount, timeT
+}
+
+func (tx *ResultLastTxSOL) TemplateTelegram() string {
+	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol:%s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n 💰 Balance: %v  ◎\n💵 Ammount: %v ◎\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol:%s\nTxID: %s\n📡 Address: %s\n 💰 Balance: %v  ◎\n💵 Ammount: %v ◎\n⬅️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	} else {
-		msg = "💱Symbol: %s\nTxID: https://explorer.solana.com/tx/%s?cluster=devnet\n📡 Address: %s\n💰 Balance: %v ◎\n💵 Ammount: %v ◎\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
+		msg = "💱Symbol: %s\nTxID: %s\n📡 Address: %s\n💰 Balance: %v ◎\n💵 Ammount: %v ◎\n➡️ TypeTx: %s\n💳 From: %s\n💳 TO: %s\n⏰ Time: %s"
 	}
 	return fmt.Sprintf(
 		msg,
 		"SOL",
-		tx.TxID,
+		fmt.Sprintf(web3.SolanaDevNet.ExplorerURL, tx.TxID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -91,34 +97,18 @@ func (tx *ResultLastTxSOL) TemplateTelegram() string {
 }
 
 func (tx *ResultLastTxSOL) TemplateDiscord() string {
-	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newBalance := float64(balance) / 1_000_000_000
-	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newAmmount := float64(ammount) / 1_000_000_000
-
-	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	//Unix Timestamp to time.Time
-	timeT := time.Unix(timestampUnix, 0)
+	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
 	if tx.TypeTx == TxSender {
 
-		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n 💰 Balance: `%v  ◎`\n💵 Ammount: `%v  ◎`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱Symbol: **`%s`**\n🆔 [Show TxID](%s)\n📡 Address: **%s**\n 💰 Balance: `%v  ◎`\n💵 Ammount: `%v  ◎`\n⬅️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	} else {
-		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](https://explorer.solana.com/tx/%s?cluster=devnet)\n📡 Address: **%s**\n💰 Balance: `%v  ◎`\n💵 Ammount: `%v  ◎`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
+		msg = "💱 Symbol: **`%s`**\n🆔 [Show TxID](%s)\n📡 Address: **%s**\n💰 Balance: `%v  ◎`\n💵 Ammount: `%v  ◎`\n➡️ TypeTx: `%s`\n💳 From: **%s**\n💳 TO: **%s**\n⏰ Time: `%s`"
 	}
 	return fmt.Sprintf(
 		msg,
 		"SOL",
-		tx.TxID,
+		fmt.Sprintf(web3.SolanaDevNet.ExplorerURL, tx.TxID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -130,23 +120,7 @@ func (tx *ResultLastTxSOL) TemplateDiscord() string {
 }
 
 func (tx *ResultLastTxSOL) TemplateSMTP() string {
-	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newBalance := float64(balance) / 1_000_000_000
-	ammount, err := strconv.ParseInt(tx.Ammount, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	newAmmount := float64(ammount) / 1_000_000_000
-
-	timestampUnix, err := strconv.ParseInt(tx.Timestamp, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	//Unix Timestamp to time.Time
-	timeT := time.Unix(timestampUnix, 0)
+	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
 	if tx.TypeTx == TxSender {
 
@@ -159,7 +133,7 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 		<body>
 		<p>💱Symbol: %s</p>
 		<br>
-		<a href="https://explorer.solana.com/tx/%s?cluster=devnet">🆔 show TxID</a>
+		<a href="%s">🆔 show TxID</a>
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
@@ -188,7 +162,7 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 		<body>
 		<p>💱Symbol: %s</p>
 		<br>
-		<a href="https://explorer.solana.com/tx/%s?cluster=devnet">🆔 show TxID</a>
+		<a href="%s">🆔 show TxID</a>
 		<br>
 		<p>📡 Address: %s</p>
 		<br>
@@ -211,7 +185,7 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 	return fmt.Sprintf(
 		msg,
 		"SOL",
-		tx.TxID,
+		fmt.Sprintf(web3.SolanaDevNet.ExplorerURL, tx.TxID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
