@@ -11,7 +11,6 @@ import (
 
 	domain "github.com/piqba/wallertme/internal/bb8/domain"
 
-	"github.com/piqba/wallertme/pkg/constants"
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/logger"
@@ -70,16 +69,7 @@ var producerCmd = &cobra.Command{
 			repo = domain.NewTxRepository(exporters.REDIS, rdb)
 		case exporters.JSONFILE:
 			repo = domain.NewTxRepository(exporters.JSONFILE, nil)
-		case exporters.POSTGRESQL:
-			pg, err := exporters.PostgreSQLConnection()
-			if err != nil {
-				logger.LogError(errors.Errorf("bb8: %v", err).Error())
-			}
-			pg.MustExec(constants.SchemaTXS)
-			repo = domain.NewTxRepository(exporters.POSTGRESQL, pg)
-		case exporters.KAFKA:
-			pk := exporters.GetProducerClientKafka()
-			repo = domain.NewTxRepository(exporters.KAFKA, pk)
+
 		}
 
 		run := true

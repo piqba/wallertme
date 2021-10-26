@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/piqba/wallertme/pkg/exporters"
@@ -22,8 +21,8 @@ type TxRepository struct {
 	exporterType string
 	clientRdb    *redis.Client
 	clientPgx    *sqlx.DB
-	clientKafka  *kafka.Producer
-	limitTx      int
+	// clientKafka  *kafka.Producer
+	limitTx int
 }
 
 func NewTx(limit int) TxRepository {
@@ -39,8 +38,8 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 			repo.clientRdb = c
 		case *sqlx.DB:
 			repo.clientPgx = c
-		case *kafka.Producer:
-			repo.clientKafka = c
+		// case *kafka.Producer:
+		// 	repo.clientKafka = c
 		default:
 			return repo
 		}
