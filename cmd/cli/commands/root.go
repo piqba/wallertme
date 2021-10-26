@@ -9,14 +9,22 @@ import (
 )
 
 const (
-	flagProvider = "provider"
+	flagNotifier    = "notifier"
+	flagExporter    = "exporter"
+	flagTimer       = "timer"
+	flagWatcher     = "watcher"
+	flagWalletsPath = "wallets::path"
+	flagWalletsName = "wallets::name"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "walletctl",
-	Short: "A cli to send data from redis to DISCORD|TELEGRAM|SMTP",
-	Long:  `this is wallertme ctl`,
+	Use:   "walletmectl",
+	Short: "A cli to send tx data from (SOLANA|CARDANO) blockchain to DISCORD|TELEGRAM|SMTP",
+	Long: `Wallertme ctl is a tool focused on: 
+	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS|KAFKA) and then send this information
+	to DISCORD|TELEGRAM|SMTP
+	`,
 }
 
 func Execute() {
