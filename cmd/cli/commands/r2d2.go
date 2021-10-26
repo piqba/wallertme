@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -41,7 +42,7 @@ var consumerCmd = &cobra.Command{
 		// discord client
 		discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{})
 		if err != nil {
-			logger.LogError(err.Error())
+			logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 		}
 
 		// smtp client
@@ -56,10 +57,14 @@ var consumerCmd = &cobra.Command{
 		var repo domain.TxRepository
 		switch notificationType {
 		case notify.TELEGRAM:
+			tgID, err := strconv.Atoi(os.Getenv("TELEGRAM_USER_ID"))
+			if err != nil {
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			}
 			repo = domain.NewTxRepository(
 				domain.ExternalOptions{
 					Type:              notificationType,
-					DstNotificationID: 927486129,
+					DstNotificationID: int64(tgID),
 				},
 				tgClientBot,
 			)
@@ -147,23 +152,23 @@ func Exec(
 			tx := domain.ResultLastTxADA{}
 			err := json.Unmarshal(bytes, &tx)
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
 			// sen data to notification provider
 			err = repo.SendNotification(tx)
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
 		case SOL:
 			tx := domain.ResultLastTxSOL{}
 			err := json.Unmarshal(bytes, &tx)
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
 			// sen data to notification provider
 			err = repo.SendNotification(tx)
 			if err != nil {
-				logger.LogError(err.Error())
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
 		}
 
