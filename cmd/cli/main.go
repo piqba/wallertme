@@ -4,7 +4,7 @@ import (
 	"runtime"
 
 	"github.com/joho/godotenv"
-	"github.com/piqba/wallertme/cmd/cli"
+	"github.com/piqba/wallertme/cmd/cli/commands"
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/logger"
 )
@@ -19,5 +19,5 @@ func init() {
 }
 
 func main() {
-	cli.Execute()
+	commands.Execute()
 }
