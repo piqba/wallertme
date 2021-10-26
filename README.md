@@ -40,6 +40,35 @@ Flags:
       --wallets::path string   select the path of wallet.json file (default "/path/<bin file>")
       --watcher                select true|false if you want to run this task periodicaly
 
+
+
+# its requiered to have the following file wallets.json
+
+touch wallets.json
+vim wallets.json
+...
+
+# paste this format of json data 
+# Important this wallets can be found on testnet(cardano) and devnet(solana)
+
+[
+    {
+        "address": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
+        "lastTx": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+        "symbol": "ADA"
+    },
+    {
+        "address": "addr_test1qq5287luxzj5l4lequrqdp5ln76ver4uls3z0m5ykr5gqsv0vxzrwcq5dmmn9e09rvgttzgrngmpxkguy7220r0u0ljqzuww7g",
+        "lastTx": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
+        "symbol": "ADA"
+    },
+    {
+        "address": "9hZaTvCVMcfbheTzebkeGR6Xi2EzMqTtPasbhGoPB94C",
+        "lastTx": "3EDaSfApwCzkHcZdLBnMdDAyo9aVV9KaxCxSdmcMuJoq4sAoedb7ziHwBwBDe2jNxjnzZC5oAb9YFfGiHSs6taGu",
+        "symbol": "SOL"
+    }
+]
+
 ```
 
 ## R2D2 module
@@ -76,5 +105,6 @@ SMTP_EMAIL_USER=test@gmail.com
 SMTP_EMAIL_PASSWORD="password"
 BOT_TOKEN=telegram:token
 DISCORD_WEBHOOK=https://discordapp.com/api/webhooks/idhook
+TELEGRAM_USER_ID=telegramID(only a number)
 
 ```
