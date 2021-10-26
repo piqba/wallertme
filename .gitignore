@@ -17,3 +17,6 @@
 .env
 build/
 export_*.json
+dist/
+
+dist/

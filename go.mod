@@ -20,7 +20,6 @@ require (
 )
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.7.0
 	github.com/jackc/pgx/v4 v4.13.0
 	github.com/jmoiron/sqlx v1.3.4
 	go.uber.org/atomic v1.7.0 // indirect
