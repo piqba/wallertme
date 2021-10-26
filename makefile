@@ -23,3 +23,7 @@ compile:
 
 compress:
 	./upx -9 -q ./build/${name}-${version}-linux-amd64
+
+# Only work if you have goreleaser instaled
+releaser:
+	goreleaser release --snapshot --rm-dist
