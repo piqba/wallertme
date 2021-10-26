@@ -15,7 +15,7 @@ var (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of mtssctl",
+	Short: "Print the version number of wallertmectl",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Version:\t%s\n", version)
 		fmt.Printf("Version Git Hash:\t%s\n", shortGitCommit(versionHash))
