@@ -7,32 +7,27 @@ import (
 	"strings"
 )
 
-const (
-// localhost rpc
-// GanacheDevNet = "http://127.0.0.1:8545"
-// // Cardano ecosystem
-// CardanoTestNet = "https://explorer-api.testnet.dandelion.link"
-// CardanoMainNet = "https://explorer-api.mainnet.dandelion.link"
-
-// // Solana Ecosystem
-// SolanaDevNet = "https://api.devnet.solana.com"
-)
-
 var (
-	CardanoTestNet = BlochainNet{
-		NameNet:     "CardanoTestNet",
-		ApiURL:      "https://explorer-api.testnet.dandelion.link",
-		ExplorerURL: "https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s",
-	}
+	CardanoTestNet = "CardanoTestNet"
+	CardanoMainNet = "CardanoMainNet"
 
-	SolanaDevNet = BlochainNet{
-		NameNet:     "SolanaDevNet",
-		ApiURL:      "https://api.devnet.solana.com",
-		ExplorerURL: "https://explorer.solana.com/tx/%s?cluster=devnet",
+	SolanaDevNet = "SolanaDevNet"
+
+	NetworkMap = map[string]BlockchainNet{
+		CardanoTestNet: {
+			NameNet:     "CardanoTestNet",
+			ApiURL:      "https://explorer-api.testnet.dandelion.link",
+			ExplorerURL: "https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s",
+		},
+		SolanaDevNet: {
+			NameNet:     "SolanaDevNet",
+			ApiURL:      "https://api.devnet.solana.com",
+			ExplorerURL: "https://explorer.solana.com/tx/%s?cluster=devnet",
+		},
 	}
 )
 
-type BlochainNet struct {
+type BlockchainNet struct {
 	NameNet     string `json:"name_net,omitempty"`
 	ApiURL      string `json:"api_url,omitempty"`
 	ExplorerURL string `json:"explorer_url,omitempty"`

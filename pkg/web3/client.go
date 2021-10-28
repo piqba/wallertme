@@ -21,8 +21,10 @@ type HttpRequestDoer interface {
 // APIClientOptions ...
 type APIClientOptions struct {
 
-	// Server url to use
-	Server string
+	// NetworkType name of network only support (CardanoTestNet|SolanaDevNet)
+	NetworkType string
+	// Server url to use Api Endpoint
+	server string
 
 	// Max number of routines to use for *All methods
 	MaxRoutines int
@@ -34,8 +36,11 @@ type APIClientOptions struct {
 
 // NewAPICardanoClient ...
 func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
-	if options.Server == "" {
-		options.Server = CardanoTestNet.ApiURL
+	if options.NetworkType == "" {
+		options.NetworkType = CardanoTestNet
+	}
+	if options.server == "" {
+		options.server = NetworkMap[CardanoTestNet].ApiURL
 	}
 
 	retryclient := retryablehttp.NewClient()
@@ -46,7 +51,7 @@ func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	}
 
 	client := &apiClient{
-		server:   options.Server,
+		server:   options.server,
 		client:   retryclient,
 		routines: options.MaxRoutines,
 	}
@@ -61,8 +66,11 @@ type APICardanoClient interface {
 
 // NewAPISolanaClient ...
 func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
-	if options.Server == "" {
-		options.Server = SolanaDevNet.ApiURL
+	if options.NetworkType == "" {
+		options.NetworkType = SolanaDevNet
+	}
+	if options.server == "" {
+		options.server = NetworkMap[SolanaDevNet].ApiURL
 	}
 
 	retryclient := retryablehttp.NewClient()
@@ -73,7 +81,7 @@ func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
 	}
 
 	client := &apiClient{
-		server:   options.Server,
+		server:   options.server,
 		client:   retryclient,
 		routines: options.MaxRoutines,
 	}
