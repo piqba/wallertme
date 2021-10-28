@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 	Use:   "walletmectl",
 	Short: "A cli to send tx data from (SOLANA|CARDANO) blockchain to DISCORD|TELEGRAM|SMTP",
 	Long: `Wallertme ctl is a tool focused on: 
-	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS|KAFKA) and then send this information
+	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS) streams and then send this information
 	to DISCORD|TELEGRAM|SMTP
 	`,
 }

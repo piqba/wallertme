@@ -5,7 +5,7 @@ wallet alert me
 
 ```bash
 Wallertme ctl is a tool focused on: 
-	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS|KAFKA) and then send this information
+	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS) streams and then send this information
 	to DISCORD|TELEGRAM|SMTP
 
 Usage:
