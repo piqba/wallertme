@@ -7,12 +7,14 @@ import (
 	"net/url"
 )
 
+// LastTxByAddr get last txs by address
 type LastTxByAddr struct {
 	Jsonrpc string                 `json:"jsonrpc"`
 	Result  []ResultTxByAddressSOL `json:"result"`
 	ID      int64                  `json:"id"`
 }
 
+// ResultTxByAddressSOL result object from getSignaturesForAddress method json-rpc
 type ResultTxByAddressSOL struct {
 	BlockTime          int64       `json:"blockTime"`
 	ConfirmationStatus string      `json:"confirmationStatus"`
@@ -30,6 +32,7 @@ func (r *ResultTxByAddressSOL) ToJSON() string {
 	return string(bytes)
 }
 
+// LastTxByAddress get last TXs by address
 func (c *apiClient) LastTxByAddress(ctx context.Context, payload PayloadReqJSONRPC) (lastTx LastTxByAddr, err error) {
 
 	requestUrl, err := url.Parse(c.server)

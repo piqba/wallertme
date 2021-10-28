@@ -8,11 +8,14 @@ import (
 )
 
 var (
+	// CardanoTestNet ...
 	CardanoTestNet = "CardanoTestNet"
+	// CardanoMainNet ...
 	CardanoMainNet = "CardanoMainNet"
-
+	// SolanaDevNet ...
 	SolanaDevNet = "SolanaDevNet"
 
+	// NetworkMap is a map that contain network information from this blockchain supports
 	NetworkMap = map[string]BlockchainNet{
 		CardanoTestNet: {
 			NameNet:     "CardanoTestNet",
@@ -27,6 +30,7 @@ var (
 	}
 )
 
+// BlockchainNet struct that define behaivor of our logic
 type BlockchainNet struct {
 	NameNet     string `json:"name_net,omitempty"`
 	ApiURL      string `json:"api_url,omitempty"`
@@ -42,6 +46,7 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("API Error, %+v", e.Response)
 }
 
+// PayloadReqJSONRPC it`s an object that define how the client can be make a simple request with JSON - RPC standard
 type PayloadReqJSONRPC struct {
 	Jsonrpc string        `json:"jsonrpc"`
 	Method  string        `json:"method"`
@@ -49,6 +54,7 @@ type PayloadReqJSONRPC struct {
 	ID      int64         `json:"id"`
 }
 
+// ToReader convert string result to reader interfaces
 func (p *PayloadReqJSONRPC) ToReader() *strings.Reader {
 	byte, err := json.Marshal(p)
 	if err != nil {

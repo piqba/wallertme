@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 )
 
+// handleAPIErrorResponse ...
 func handleAPIErrorResponse(res *http.Response) error {
 	switch res.StatusCode {
 	case 400:
@@ -25,6 +26,7 @@ func handleAPIErrorResponse(res *http.Response) error {
 	}
 }
 
+// handleRequest ...
 func (c *apiClient) handleRequest(req *http.Request) (res *http.Response, err error) {
 	req.Header.Add("Content-Type", "application/json")
 	rreq, err := retryablehttp.FromRequest(req)

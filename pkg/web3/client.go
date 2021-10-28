@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 )
 
+// apiClient core struct for our api client logic
 type apiClient struct {
 	server   string
 	client   *retryablehttp.Client
@@ -18,7 +19,7 @@ type HttpRequestDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// APIClientOptions ...
+// APIClientOptions for management all clients
 type APIClientOptions struct {
 
 	// NetworkType name of network only support (CardanoTestNet|SolanaDevNet)
@@ -34,7 +35,10 @@ type APIClientOptions struct {
 	RetryMax     int           // Maximum number of retries
 }
 
-// NewAPICardanoClient ...
+// NewAPICardanoClient is a function in charge of to proccess all logic from cardano API
+//
+//
+// More info visit here -> https://explorer-api.testnet.dandelion.link
 func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	if options.NetworkType == "" {
 		options.NetworkType = CardanoTestNet
@@ -59,12 +63,16 @@ func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 	return client, nil
 }
 
+// APICardanoClient define all methods that can be used on our program
 type APICardanoClient interface {
 	// InfoByAddress ...
 	InfoByAddress(ctx context.Context, address string) (AddrSumary, error)
 }
 
-// NewAPISolanaClient ...
+// NewAPISolanaClient is a function in charge of to proccess all logic from solana API
+//
+//
+//  More info visit here -> https://api.devnet.solana.com
 func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
 	if options.NetworkType == "" {
 		options.NetworkType = SolanaDevNet
@@ -88,6 +96,8 @@ func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
 
 	return client, nil
 }
+
+// APISolanaClient define all methods that can be used on our program
 
 type APISolanaClient interface {
 	// LastTxByAddress ...

@@ -7,6 +7,7 @@ import (
 	"net/url"
 )
 
+// TxInfo return information related to a TX
 type TxInfo struct {
 	Jsonrpc string       `json:"jsonrpc"`
 	Result  ResultTxInfo `json:"result"`
@@ -21,6 +22,7 @@ func (r *TxInfo) ToJSON() string {
 	return string(bytes)
 }
 
+// ResultTxInfo return result information by an specific TX
 type ResultTxInfo struct {
 	BlockTime   int64       `json:"blockTime"`
 	Meta        Meta        `json:"meta"`
@@ -28,6 +30,7 @@ type ResultTxInfo struct {
 	Transaction Transaction `json:"transaction"`
 }
 
+// Meta object with tx information
 type Meta struct {
 	Err               interface{}   `json:"err"`
 	Fee               int64         `json:"fee"`
@@ -45,11 +48,13 @@ type Status struct {
 	Ok interface{} `json:"Ok"`
 }
 
+// Transaction ...
 type Transaction struct {
 	Message    Message  `json:"message"`
 	Signatures []string `json:"signatures"`
 }
 
+// Message ...
 type Message struct {
 	AccountKeys     []string      `json:"accountKeys"`
 	Header          Header        `json:"header"`
@@ -57,18 +62,21 @@ type Message struct {
 	RecentBlockhash string        `json:"recentBlockhash"`
 }
 
+// Header ...
 type Header struct {
 	NumReadonlySignedAccounts   int64 `json:"numReadonlySignedAccounts"`
 	NumReadonlyUnsignedAccounts int64 `json:"numReadonlyUnsignedAccounts"`
 	NumRequiredSignatures       int64 `json:"numRequiredSignatures"`
 }
 
+// Instruction ...
 type Instruction struct {
 	Accounts       []int64 `json:"accounts"`
 	Data           string  `json:"data"`
 	ProgramIDIndex int64   `json:"programIdIndex"`
 }
 
+// InfoByTx get info by TX
 func (c *apiClient) InfoByTx(ctx context.Context, payload PayloadReqJSONRPC) (info TxInfo, err error) {
 
 	requestUrl, err := url.Parse(c.server)

@@ -9,13 +9,16 @@ import (
 )
 
 const (
+	// resourceAddress endpoint resource for get summary by address
 	resourceAddress = "api/addresses/summary"
 )
 
+// AddrSumary it`s a result for the cardano API
 type AddrSumary struct {
 	Result Right `json:"Right"`
 }
 
+// Right main object
 type Right struct {
 	CAAddress     string     `json:"caAddress"`
 	CAType        string     `json:"caType"`
@@ -28,6 +31,7 @@ type Right struct {
 	CATxList      []CATxList `json:"caTxList"`
 }
 
+// ToJSON convert to JSON this struct
 func (r *Right) ToJSON() string {
 	bytes, err := json.Marshal(r)
 	if err != nil {
@@ -36,16 +40,19 @@ func (r *Right) ToJSON() string {
 	return string(bytes)
 }
 
+// CABalance get balance
 type CABalance struct {
 	GetCoin string `json:"getCoin"`
 }
 
+// CAChainTip get general info from Chain
 type CAChainTip struct {
 	CTBlockNo   int64  `json:"ctBlockNo"`
 	CTSlotNo    int64  `json:"ctSlotNo"`
 	CTBlockHash string `json:"ctBlockHash"`
 }
 
+// CATxList get info from TXs
 type CATxList struct {
 	CtbID         string    `json:"ctbId"`
 	CtbTimeIssued int64     `json:"ctbTimeIssued"`
@@ -56,6 +63,7 @@ type CATxList struct {
 	CtbFees       CABalance `json:"ctbFees"`
 }
 
+// CtbPut general info from Put object
 type CtbPut struct {
 	CtaAddress string    `json:"ctaAddress"`
 	CtaAmount  CABalance `json:"ctaAmount"`
@@ -63,6 +71,7 @@ type CtbPut struct {
 	CtaTxIndex int64     `json:"ctaTxIndex"`
 }
 
+// InfoByAddress get info by address
 func (c *apiClient) InfoByAddress(ctx context.Context, address string) (AddrSumary, error) {
 	requestUrl, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.server, resourceAddress, address))
 	if err != nil {
