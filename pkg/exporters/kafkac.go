@@ -1,8 +1,8 @@
 package exporters
 
 const (
-	// TXS_TOPIC_KEY ...
-	TXS_TOPIC_KEY = "txs"
+// TXS_TOPIC_KEY ...
+// TXS_TOPIC_KEY = "txs"
 )
 
 var (

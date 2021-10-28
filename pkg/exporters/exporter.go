@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/jmoiron/sqlx"
 	"github.com/piqba/wallertme/pkg/logger"
 )
 
@@ -16,9 +15,7 @@ const (
 	// JSONFILE ...
 	JSONFILE = "json"
 	// KAFKA ...
-	KAFKA = "kafka"
-	// POSTGRESQL ...
-	POSTGRESQL = "postgresql"
+	// KAFKA = "kafka"
 	// REDIS ...
 	REDIS = "redis"
 )
@@ -76,7 +73,8 @@ func ExportToRedisStream(rdb *redis.Client, key, symbol string, value map[string
 	return nil
 }
 
-// ExportToRedisStream ...
+// ExportTokafka ...
+// Was commented for developments reasson.
 // func ExportTokafka(p *kafka.Producer, topic string, value string) error {
 // 	var err error
 // 	// Delivery report handler for produced messages
@@ -105,17 +103,3 @@ func ExportToRedisStream(rdb *redis.Client, key, symbol string, value map[string
 // 	}
 // 	return nil
 // }
-
-// ExportToPostgresql ...
-func ExportToPostgresql(db *sqlx.DB, blockID int, value string) error {
-	tx := db.MustBegin()
-	query := "INSERT INTO last_txs (blockid, data) VALUES ($1, $2) ON CONFLICT (blockid) DO NOTHING"
-
-	tx.MustExec(
-		query,
-		blockID,
-		value,
-	)
-	return tx.Commit()
-
-}
