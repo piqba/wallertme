@@ -1,4 +1,4 @@
-package constants
+package storage
 
 const (
 	SchemaTXS = `
