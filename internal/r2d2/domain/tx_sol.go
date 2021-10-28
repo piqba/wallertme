@@ -11,6 +11,7 @@ import (
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
+// ResultLastTxSOL ...
 type ResultLastTxSOL struct {
 	Addr      string `json:"addr,omitempty"`
 	TxID      string `json:"tx_id,omitempty"`
@@ -31,6 +32,7 @@ func (tx *ResultLastTxSOL) ToJSON() string {
 	return string(bytes)
 }
 
+// ToMAP ...
 func (tx *ResultLastTxSOL) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(tx)
@@ -52,6 +54,7 @@ func (tx *ResultLastTxSOL) TruncateAddress(address string) string {
 	return cleanAddress
 }
 
+// parseField ...
 func (tx *ResultLastTxSOL) parseField() (float64, float64, time.Time) {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
@@ -73,6 +76,7 @@ func (tx *ResultLastTxSOL) parseField() (float64, float64, time.Time) {
 	return newBalance, newAmmount, timeT
 }
 
+// TemplateTelegram ...
 func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
@@ -96,6 +100,7 @@ func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	)
 }
 
+// TemplateDiscord ...
 func (tx *ResultLastTxSOL) TemplateDiscord() string {
 	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
@@ -119,6 +124,7 @@ func (tx *ResultLastTxSOL) TemplateDiscord() string {
 	)
 }
 
+// TemplateSMTP ...
 func (tx *ResultLastTxSOL) TemplateSMTP() string {
 	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string

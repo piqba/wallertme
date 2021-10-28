@@ -7,11 +7,13 @@ import (
 	"github.com/piqba/wallertme/pkg/notify"
 )
 
+// ExternalOptions ...
 type ExternalOptions struct {
 	Type              string
 	DstNotificationID int64
 }
 
+// TxRepository ...
 type TxRepository struct {
 	Option        ExternalOptions
 	TGClient      *tgbotapi.BotAPI
@@ -19,6 +21,7 @@ type TxRepository struct {
 	SMTPClient    notify.Sender
 }
 
+// NewTxRepository ...
 func NewTxRepository(options ExternalOptions, clients ...interface{}) TxRepository {
 	var repo TxRepository
 	repo.Option = options
@@ -35,6 +38,7 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 	return repo
 }
 
+// SendNotification ...
 func (r *TxRepository) SendNotification(data interface{}) error {
 
 	t := reflect.TypeOf(data)

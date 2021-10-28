@@ -12,10 +12,13 @@ import (
 )
 
 const (
-	TxSender   = "sender"
+	// TxSender OUT
+	TxSender = "sender"
+	// TxReceiver IN
 	TxReceiver = "receiver"
 )
 
+// ResultLastTxADA ...
 type ResultLastTxADA struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
@@ -35,6 +38,8 @@ func (rtx *ResultLastTxADA) ToJSON() string {
 	}
 	return string(bytes)
 }
+
+// parseField ...
 func (tx *ResultLastTxADA) parseField() (float64, float64, time.Time) {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
@@ -55,6 +60,8 @@ func (tx *ResultLastTxADA) parseField() (float64, float64, time.Time) {
 	timeT := time.Unix(timestampUnix, 0)
 	return newBalance, newAmmount, timeT
 }
+
+// ToMAP ...
 func (rtx *ResultLastTxADA) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
@@ -76,6 +83,7 @@ func (rtx *ResultLastTxADA) TruncateAddress(address string) string {
 	return cleanAddress
 }
 
+// TemplateTelegram ...
 func (tx *ResultLastTxADA) TemplateTelegram() string {
 	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
@@ -99,6 +107,7 @@ func (tx *ResultLastTxADA) TemplateTelegram() string {
 	)
 }
 
+// TemplateDiscord ...
 func (tx *ResultLastTxADA) TemplateDiscord() string {
 	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
@@ -122,6 +131,7 @@ func (tx *ResultLastTxADA) TemplateDiscord() string {
 	)
 }
 
+// TemplateSMTP ...
 func (tx *ResultLastTxADA) TemplateSMTP() string {
 	newBalance, newAmmount, timeT := tx.parseField()
 	var msg string
