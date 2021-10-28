@@ -129,7 +129,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 	symbol := wallet["symbol"].(string)
 	switch symbol {
 	case "ADA":
-		addrInfo := lastTXForADA(wallet["address"].(string))
+		addrInfo := lastTXForADA(wallet["networkType"].(string), wallet["address"].(string))
 
 		lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
 		tx := domain.ResultLastTxADA{
@@ -177,7 +177,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 			}
 		}
 	case "SOL":
-		addrInfo := lastTXForSOL(wallet["address"].(string))
+		addrInfo := lastTXForSOL(wallet["networkType"].(string), wallet["address"].(string))
 		tx := domain.ResultLastTxSOL{
 			Addr:      wallet["address"].(string),
 			TxID:      addrInfo.Result.Transaction.Signatures[0],
@@ -231,8 +231,10 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 
 }
 
-func lastTXForADA(address string) web3.AddrSumary {
-	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
+func lastTXForADA(networkType, address string) web3.AddrSumary {
+	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{
+		NetworkType: networkType,
+	})
 	if err != nil {
 		logger.LogError(errors.Errorf("main:%s", err).Error())
 	}
@@ -244,8 +246,10 @@ func lastTXForADA(address string) web3.AddrSumary {
 
 	return sumary
 }
-func lastTXForSOL(address string) web3.TxInfo {
-	solanaApi, err := web3.NewAPISolanaClient(web3.APIClientOptions{})
+func lastTXForSOL(networkType, address string) web3.TxInfo {
+	solanaApi, err := web3.NewAPISolanaClient(web3.APIClientOptions{
+		NetworkType: networkType,
+	})
 	if err != nil {
 		logger.LogError(errors.Errorf("main:%s", err).Error())
 	}
