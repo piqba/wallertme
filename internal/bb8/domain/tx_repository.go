@@ -17,6 +17,7 @@ var (
 	cwd, _ = os.Getwd()
 )
 
+// TxRepository repository
 type TxRepository struct {
 	exporterType string
 	clientRdb    *redis.Client
@@ -25,10 +26,12 @@ type TxRepository struct {
 	limitTx int
 }
 
+// NewTx constructor
 func NewTx(limit int) TxRepository {
 	return TxRepository{limitTx: limit}
 }
 
+// NewTxRepository constructor client
 func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 	var repo TxRepository
 	repo.exporterType = exporterType
@@ -38,8 +41,7 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 			repo.clientRdb = c
 		case *sqlx.DB:
 			repo.clientPgx = c
-		// case *kafka.Producer:
-		// 	repo.clientKafka = c
+
 		default:
 			return repo
 		}
@@ -47,6 +49,7 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 	return repo
 }
 
+// ExportData export data from ADA or SOL symbol
 func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 
 	t := reflect.TypeOf(data)
@@ -101,6 +104,7 @@ func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 	return nil
 }
 
+// InfoByAddress get info by address
 func (r *TxRepository) InfoByAddress(address string) (ResultInfoForADA, error) {
 
 	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
@@ -127,6 +131,7 @@ func (r *TxRepository) InfoByAddress(address string) (ResultInfoForADA, error) {
 	}, nil
 }
 
+// Set an address as a key and the last TX as a value
 func (r *TxRepository) Set(ctx context.Context, address, lastTx string, expiration time.Duration) error {
 	// err = redisdb.Set("key", "value", 0).Err() never expire
 	// err = redisdb.Set("key", "value", time.Hour).Err()
@@ -137,6 +142,7 @@ func (r *TxRepository) Set(ctx context.Context, address, lastTx string, expirati
 	return nil
 }
 
+// Get the last tx value  by address as a key
 func (r *TxRepository) Get(ctx context.Context, address string) (string, error) {
 	lastTx, err := r.clientRdb.Get(ctx, address).Result()
 	if err != nil {

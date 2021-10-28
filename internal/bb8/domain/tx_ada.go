@@ -7,6 +7,7 @@ import (
 	"github.com/piqba/wallertme/pkg/web3"
 )
 
+// ResultLastTxADA return the last TX by ADA symbol (Cardano blockchain)
 type ResultLastTxADA struct {
 	Addr          string `json:"addr,omitempty"`
 	CtbID         string `json:"ctbId,omitempty"`
@@ -27,6 +28,7 @@ func (rtx *ResultLastTxADA) ToJSON() string {
 	return string(bytes)
 }
 
+// ToMAP ...
 func (rtx *ResultLastTxADA) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
@@ -48,7 +50,7 @@ func (rtx *ResultLastTxADA) TruncateAddress(address string) string {
 	return cleanAddress
 }
 
-// ResultInfoForADA ...
+// ResultInfoForADA information for ADA address
 type ResultInfoForADA struct {
 	Address   string          `json:"address,omitempty"`
 	Type      string          `json:"type,omitempty"`

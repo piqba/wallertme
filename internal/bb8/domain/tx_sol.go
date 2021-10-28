@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// ResultLastTxSOL return the last TX by address SOL symbol
 type ResultLastTxSOL struct {
 	Addr      string `json:"addr,omitempty"`
 	TxID      string `json:"tx_id,omitempty"`
@@ -25,6 +26,7 @@ func (rtx *ResultLastTxSOL) ToJSON() string {
 	return string(bytes)
 }
 
+// ToMAP ...
 func (rtx *ResultLastTxSOL) ToMAP() (toHashMap map[string]interface{}, err error) {
 
 	fromStruct, err := json.Marshal(rtx)
