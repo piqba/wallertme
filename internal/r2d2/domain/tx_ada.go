@@ -88,7 +88,7 @@ func (tx *ResultLastTxADA) TemplateTelegram() string {
 	return fmt.Sprintf(
 		msg,
 		"ADA",
-		fmt.Sprintf(web3.CardanoTestNet.ExplorerURL, tx.CtbID),
+		fmt.Sprintf(web3.NetworkMap[web3.CardanoTestNet].ExplorerURL, tx.CtbID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -111,7 +111,7 @@ func (tx *ResultLastTxADA) TemplateDiscord() string {
 	return fmt.Sprintf(
 		msg,
 		"ADA",
-		fmt.Sprintf(web3.CardanoTestNet.ExplorerURL, tx.CtbID),
+		fmt.Sprintf(web3.NetworkMap[web3.CardanoTestNet].ExplorerURL, tx.CtbID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -188,7 +188,7 @@ func (tx *ResultLastTxADA) TemplateSMTP() string {
 	return fmt.Sprintf(
 		msg,
 		"ADA",
-		fmt.Sprintf(web3.CardanoTestNet.ExplorerURL, tx.CtbID),
+		fmt.Sprintf(web3.NetworkMap[web3.CardanoTestNet].ExplorerURL, tx.CtbID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,

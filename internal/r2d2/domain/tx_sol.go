@@ -85,7 +85,7 @@ func (tx *ResultLastTxSOL) TemplateTelegram() string {
 	return fmt.Sprintf(
 		msg,
 		"SOL",
-		fmt.Sprintf(web3.SolanaDevNet.ExplorerURL, tx.TxID),
+		fmt.Sprintf(web3.NetworkMap[web3.SolanaDevNet].ExplorerURL, tx.TxID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -108,7 +108,7 @@ func (tx *ResultLastTxSOL) TemplateDiscord() string {
 	return fmt.Sprintf(
 		msg,
 		"SOL",
-		fmt.Sprintf(web3.SolanaDevNet.ExplorerURL, tx.TxID),
+		fmt.Sprintf(web3.NetworkMap[web3.SolanaDevNet].ExplorerURL, tx.TxID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
@@ -185,7 +185,7 @@ func (tx *ResultLastTxSOL) TemplateSMTP() string {
 	return fmt.Sprintf(
 		msg,
 		"SOL",
-		fmt.Sprintf(web3.SolanaDevNet.ExplorerURL, tx.TxID),
+		fmt.Sprintf(web3.NetworkMap[web3.SolanaDevNet].ExplorerURL, tx.TxID),
 		tx.TruncateAddress(tx.Addr),
 		newBalance,
 		newAmmount,
