@@ -7,11 +7,13 @@ import (
 	"github.com/piqba/wallertme/pkg/logger"
 )
 
+// TgBotOption object options for telegram service
 type TgBotOption struct {
 	Debug bool
 	Token string
 }
 
+// GetTgBot get an instance of tgBot
 func GetTgBot(option TgBotOption) *tgbotapi.BotAPI {
 	var token string
 	if option.Token == "" {

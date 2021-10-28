@@ -20,16 +20,21 @@ const (
 	SMTPServer = "smtp.gmail.com"
 )
 
+// Sender object it`s used to send SMTP request
 type Sender struct {
-	User     string
+	// User ...
+	User string
+	// Password
 	Password string
 }
 
+// NewSender constructor
 func NewSender(Username, Password string) Sender {
 
 	return Sender{Username, Password}
 }
 
+// SendMail send mail to an array of dst
 func (sender Sender) SendMail(Dest []string, Subject, bodyMessage string) {
 
 	msg := "From: " + sender.User + "\n" +
@@ -48,6 +53,7 @@ func (sender Sender) SendMail(Dest []string, Subject, bodyMessage string) {
 
 }
 
+// WriteEmail an email
 func (sender Sender) WriteEmail(dest []string, contentType, subject, bodyMessage string) string {
 
 	header := make(map[string]string)
@@ -83,11 +89,13 @@ func (sender Sender) WriteEmail(dest []string, contentType, subject, bodyMessage
 	return message
 }
 
+// WriteHTMLEmail ...
 func (sender *Sender) WriteHTMLEmail(dest []string, subject, bodyMessage string) string {
 
 	return sender.WriteEmail(dest, "text/html", subject, bodyMessage)
 }
 
+// WritePlainEmail ...
 func (sender *Sender) WritePlainEmail(dest []string, subject, bodyMessage string) string {
 
 	return sender.WriteEmail(dest, "text/plain", subject, bodyMessage)

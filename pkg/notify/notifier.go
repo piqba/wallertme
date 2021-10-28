@@ -13,10 +13,12 @@ const (
 	SMTP     = "smtp"
 )
 
+// Notifier ...
 type Notifier interface {
 	SendNotification(data interface{}) error
 }
 
+// SendMessageTG send msg to telegram
 func SendMessageTG(bot *tgbotapi.BotAPI, id int64, message string) error {
 	msg := tgbotapi.NewMessage(id, message)
 	if _, err := bot.Send(msg); err != nil {
@@ -25,6 +27,7 @@ func SendMessageTG(bot *tgbotapi.BotAPI, id int64, message string) error {
 	return nil
 }
 
+// SendMessageDiscord send msg to discord
 func SendMessageDiscord(discordClient DiscordClient, message string) error {
 
 	err := discordClient.PostMessage(context.TODO(), message)
@@ -35,6 +38,7 @@ func SendMessageDiscord(discordClient DiscordClient, message string) error {
 	return nil
 }
 
+// SendMessageSMTP send msg to SMTP
 func SendMessageSMTP(sender *Sender, message string) {
 	//The receiver needs to be in slice as the receive supports multiple receiver
 	Receiver := []string{os.Getenv("SMTP_EMAIL_RECEIVER")}

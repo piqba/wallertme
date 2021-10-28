@@ -32,7 +32,7 @@ type DiscordClient interface {
 	PostMessage(ctx context.Context, message string) error
 }
 
-// NewDiscordClient ...
+// NewDiscordClient create an instance of discord client
 func NewDiscordClient(options DiscordClientOptions) (DiscordClient, error) {
 	if options.ServerHook == "" {
 		options.ServerHook = os.Getenv("DISCORD_WEBHOOK")
@@ -49,6 +49,7 @@ func NewDiscordClient(options DiscordClientOptions) (DiscordClient, error) {
 	return client, nil
 }
 
+// PayloadWebHookDiscord general payload to make request to discord Hook
 type PayloadWebHookDiscord struct {
 	Username  string  `json:"username,omitempty"`
 	AvatarURL string  `json:"avatar_url,omitempty"`
@@ -64,6 +65,7 @@ func (p *PayloadWebHookDiscord) ToReader() *strings.Reader {
 	return strings.NewReader(string(byte))
 }
 
+// Embed object that define the structure of our msg
 type Embed struct {
 	Author      Author `json:"author,omitempty"`
 	Title       string `json:"title,omitempty"`
@@ -72,12 +74,14 @@ type Embed struct {
 	Color       int64  `json:"color,omitempty"`
 }
 
+// Author ...
 type Author struct {
 	Name    string `json:"name,omitempty"`
 	URL     string `json:"url,omitempty"`
 	IconURL string `json:"icon_url,omitempty"`
 }
 
+// PostMessage send post request msga
 func (c *discordClient) PostMessage(ctx context.Context, message string) error {
 	payload := PayloadWebHookDiscord{
 		Username: "R2D2",
