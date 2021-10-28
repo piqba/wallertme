@@ -1,46 +1,64 @@
 # wallertme
-wallet alert me
+wallet alert me is an app off-chain. It's a space where the user can register their wallet and can receive notifications of their transactions with other wallets. Our roadmap you can find here [project board](https://piqba.notion.site/piqba/d0682ea1e7e748969aab454b1a437237?v=e09ed390c7c945bf9288891178f3637a)
 
-## Usage 
+
+
+## How to interact with app for testing reasson 
+
+
+For the Solana blockchain, we need to have a wallet. How you can get a wallet?
+
+Go to [pahtom wallet](https://phantom.app/) install and select Devnet network.
+
+Then if you are new in this ecosystem like me, I recomend you read this posts [solana cli tool](https://docs.solana.com/cli/install-solana-cli-tools) and then follow this steps [Send and Receive Tokens](https://docs.solana.com/cli/transfer-tokens) for testing propourse.
+
+For the Cardano blockchain, we need to have a wallet. How you can get a wallet?
+
+Go to [nami wallet](https://namiwallet.io/) install and select CardanoTestNet network.
+
+Then if you are new in this ecosystem like me, go to [cardano faucets](https://developers.cardano.org/docs/integrate-cardano/testnet-faucet/) and get ADA for testing propourse.
+
+
+
+Then when you are completed the previous steps, follow this bash descriptions
+
+
+
+### Download walletmectl
+
+Go to last release and download [walletmectl](https://github.com/piqba/wallertme/releases) binary for you OS
+
+
+### Setup .env file
+
 
 ```bash
-Wallertme ctl is a tool focused on: 
-	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS) streams and then send this information
-	to DISCORD|TELEGRAM|SMTP
 
-Usage:
-  walletmectl [command]
+touch .env
 
-Available Commands:
-  bb8         Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)
-  completion  generate the autocompletion script for the specified shell
-  help        Help about any command
-  r2d2        Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)
-  version     Print the version number of wallertmectl
+# put into this file
+# Database settings optional at the moment:
+DB_SERVER_URL="host=localhost port=5432 user=xxxx password=xxxx dbname=xxxx sslmode=disable"
+DB_MAX_CONNECTIONS=100
+DB_MAX_IDLE_CONNECTIONS=10
+DB_MAX_LIFETIME_CONNECTIONS=2
+# REDIS requiered very important
+REDIS_URI=localhost:6379
+REDIS_PASS=""
 
-Flags:
-  -h, --help   help for walletmectl
-
-Use "walletmectl [command] --help" for more information about a command.
+# notification providers  very important
+SMTP_EMAIL_RECEIVER=test@gmail.com
+SMTP_EMAIL_USER=test@gmail.com
+SMTP_EMAIL_PASSWORD="password"
+BOT_TOKEN=telegram:token
+DISCORD_WEBHOOK=https://discordapp.com/api/webhooks/idhook
+TELEGRAM_USER_ID=telegramID(only a number)
 
 ```
-## BB8 module
+
+### Create wallets.json file
 
 ```bash
-Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)
-
-Usage:
-  walletmectl bb8 [flags]
-
-Flags:
-      --exporter string        select a exporter to send data (default "redis")
-  -h, --help                   help for bb8
-      --timer string           select a time duration to watch all txs (default "1s")
-      --wallets::name string   select the name of wallet.json file (default "wallets.json")
-      --wallets::path string   select the path of wallet.json file (default "/path/<bin file>")
-      --watcher                select true|false if you want to run this task periodicaly
-
-
 
 # its requiered to have the following file wallets.json
 
@@ -74,7 +92,49 @@ vim wallets.json
 
 ```
 
-## R2D2 module
+### Usage CLI walletmectl
+
+```bash
+Wallertme ctl is a tool focused on: 
+	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS) streams and then send this information
+	to DISCORD|TELEGRAM|SMTP
+
+Usage:
+  walletmectl [command]
+
+Available Commands:
+  bb8         Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)
+  completion  generate the autocompletion script for the specified shell
+  help        Help about any command
+  r2d2        Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)
+  version     Print the version number of wallertmectl
+
+Flags:
+  -h, --help   help for walletmectl
+
+Use "walletmectl [command] --help" for more information about a command.
+
+```
+### BB8 module
+
+```bash
+Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)
+
+Usage:
+  walletmectl bb8 [flags]
+
+Flags:
+      --exporter string        select a exporter to send data (default "redis")
+  -h, --help                   help for bb8
+      --timer string           select a time duration to watch all txs (default "1s")
+      --wallets::name string   select the name of wallet.json file (default "wallets.json")
+      --wallets::path string   select the path of wallet.json file (default "/path/<bin file>")
+      --watcher                select true|false if you want to run this task periodicaly
+
+
+```
+
+### R2D2 module
 ```bash
 Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)
 
@@ -86,28 +146,12 @@ Flags:
       --notifier string   select a provider to send notifications (default "telegram")
 
 ```
-## setup env file
 
-```bash
 
-touch .env
+### ScreenShots notifications
 
-# put into this file
-# Database settings:
-DB_SERVER_URL="host=localhost port=5432 user=xxxx password=xxxx dbname=xxxx sslmode=disable"
-DB_MAX_CONNECTIONS=100
-DB_MAX_IDLE_CONNECTIONS=10
-DB_MAX_LIFETIME_CONNECTIONS=2
-# REDIS
-REDIS_URI=localhost:6379
-REDIS_PASS=""
-# KAFKA_HOST="localhost:9092"
-# notification providers
-SMTP_EMAIL_RECEIVER=test@gmail.com
-SMTP_EMAIL_USER=test@gmail.com
-SMTP_EMAIL_PASSWORD="password"
-BOT_TOKEN=telegram:token
-DISCORD_WEBHOOK=https://discordapp.com/api/webhooks/idhook
-TELEGRAM_USER_ID=telegramID(only a number)
 
-```
+Telegram notification
+
+![R2D2](/docs/assets/tg.png)
+
