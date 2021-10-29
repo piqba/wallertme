@@ -5,91 +5,98 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	domain "github.com/piqba/wallertme/internal/r2d2/domain"
 
+	domain "github.com/piqba/wallertme/internal/r2d2/domain"
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/logger"
 	"github.com/piqba/wallertme/pkg/notify"
+	"github.com/piqba/wallertme/pkg/storage"
 	"github.com/spf13/cobra"
 )
 
 var (
-	ADA = exporters.TXS_STREAM_KEY + ":" + "ADA"
-	SOL = exporters.TXS_STREAM_KEY + ":" + "SOL"
+	// seededRand random number
+	// #nosec
+	seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
 )
+
+const (
+	// CHARSET of characters
+	CHARSET = "abcdefghijklmnopqrstuvwxyz" +
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$*-/+"
+	// SALT for define the size of the buffer
+	SALT = 10
+)
+
+// StringWithCharset generate randoms words
+func StringWithCharset() string {
+	b := make([]byte, SALT)
+	for i := range b {
+		b[i] = CHARSET[seededRand.Intn(len(CHARSET))]
+	}
+	return string(b)
+}
+
 var consumerCmd = &cobra.Command{
 	Use:   "r2d2",
 	Short: "Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)",
 	Run: func(cmd *cobra.Command, args []string) {
-		notifier, err := cmd.Flags().GetString(flagNotifier)
+		// flags
+		source, err := cmd.Flags().GetString(flagDataSource)
 		if err != nil {
-			logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
+		groupName, err := cmd.Flags().GetString(flagConsumerGroup)
+		if err != nil {
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+		}
+		walletsPath, err := cmd.Flags().GetString(flagWalletsPath)
+		if err != nil {
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+		}
+		walletsName, err := cmd.Flags().GetString(flagWalletsName)
+		if err != nil {
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+		}
+		// end flags
 
-		redisDbClient := exporters.GetRedisDbClient()
-		// telegram client
-		tgClientBot := notify.GetTgBot(notify.TgBotOption{
-			Debug: false,
-			Token: "",
+		// load wallets from source migrate to factory pattern
+		dataSource := storage.NewSource(source, storage.OptionsSource{
+			FileName: walletsName,
+			PathName: walletsPath,
 		})
-
-		// discord client
-		discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{})
+		wallets, err := dataSource.WalletsTONotify()
 		if err != nil {
-			logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+		}
+		// end Load wallets
+
+		// vars
+		redisDbClient := exporters.GetRedisDbClient()
+
+		streams := []string{}
+		// create automatically streams key txs::addr
+		for _, wallet := range wallets {
+			streams = append(streams, fmt.Sprintf("%s::%s", "txs", wallet.Address))
 		}
 
-		// smtp client
-		smtpClient := notify.NewSender(
-			os.Getenv("SMTP_EMAIL_USER"),
-			os.Getenv("SMTP_EMAIL_PASSWORD"),
-		)
-
-		// notification type
-		notificationType := notifier
-
-		var repo domain.TxRepository
-		switch notificationType {
-		case notify.TELEGRAM:
-			tgID, err := strconv.Atoi(os.Getenv("TELEGRAM_USER_ID"))
-			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
-			}
-			repo = domain.NewTxRepository(
-				domain.ExternalOptions{
-					Type:              notificationType,
-					DstNotificationID: int64(tgID),
-				},
-				tgClientBot,
-			)
-		case notify.DISCORD:
-			repo = domain.NewTxRepository(
-				domain.ExternalOptions{
-					Type: notificationType,
-				},
-				discordClient,
-			)
-		case notify.SMTP:
-			repo = domain.NewTxRepository(domain.ExternalOptions{
-				Type:              notificationType,
-				DstNotificationID: 0,
-			},
-				smtpClient,
-			)
-		}
-
-		streams := []string{ADA, SOL}
 		var ids []string
-		consumersGroup := "r2d2-consumer"
+		if groupName == "" {
+			groupName = "r2d2-" + StringWithCharset()
+		}
+		groupName = "r2d2-" + groupName
 		for _, v := range streams {
 			ids = append(ids, ">")
-			err := redisDbClient.XGroupCreate(context.TODO(), v, consumersGroup, "0").Err()
+			err := redisDbClient.XGroupCreate(context.TODO(), v, groupName, "0").Err()
 			if err != nil {
 				log.Println(err)
 			}
@@ -100,7 +107,7 @@ var consumerCmd = &cobra.Command{
 
 		for {
 			entries, err := redisDbClient.XReadGroup(context.Background(), &redis.XReadGroupArgs{
-				Group:    consumersGroup,
+				Group:    groupName,
 				Consumer: fmt.Sprintf("%d", time.Now().UnixNano()),
 				Streams:  streams,
 				Count:    2,
@@ -112,7 +119,16 @@ var consumerCmd = &cobra.Command{
 			}
 
 			for _, it := range entries {
-				Exec(redisDbClient, consumersGroup, it, repo)
+				for _, wallet := range wallets {
+
+					Exec(
+						redisDbClient,
+						groupName,
+						it,
+						wallet,
+					)
+
+				}
 			}
 
 		}
@@ -121,7 +137,11 @@ var consumerCmd = &cobra.Command{
 }
 
 func init() {
-	consumerCmd.Flags().String(flagNotifier, notify.TELEGRAM, "select a provider to send notifications")
+	consumerCmd.Flags().String(flagDataSource, "json", "select a wallets data source from (json|db)")
+	consumerCmd.Flags().String(flagConsumerGroup, "", "select a name for your consumer group")
+	consumerCmd.Flags().String(flagWalletsPath, walletsJsonPath, "select the path of wallet.json file")
+	consumerCmd.Flags().String(flagWalletsName, "wallets.json", "select the name of wallet.json file")
+
 	rootCmd.AddCommand(consumerCmd)
 
 }
@@ -130,7 +150,7 @@ func Exec(
 	rdb *redis.Client,
 	consumersGroup string,
 	stream redis.XStream,
-	repo domain.TxRepository,
+	wallet storage.Wallet,
 ) {
 	for i := 0; i < len(stream.Messages); i++ {
 		messageID := stream.Messages[i].ID
@@ -146,31 +166,94 @@ func Exec(
 			consumersGroup,
 			messageID,
 		)
+		if strings.Contains(string(bytes), "ADA") {
 
-		switch stream.Stream {
-		case ADA:
 			tx := domain.ResultLastTxADA{}
 			err := json.Unmarshal(bytes, &tx)
 			if err != nil {
 				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
-			// sen data to notification provider
-			err = repo.SendNotification(tx)
-			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			if wallet.Address == tx.Addr {
+				repo := getNotify(wallet)
+				// sen data to notification provider
+				err = repo.SendNotification(tx)
+				if err != nil {
+					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+				}
 			}
-		case SOL:
+		} else {
 			tx := domain.ResultLastTxSOL{}
 			err := json.Unmarshal(bytes, &tx)
 			if err != nil {
 				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
-			// sen data to notification provider
-			err = repo.SendNotification(tx)
-			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			if wallet.Address == tx.Addr {
+				repo := getNotify(wallet)
+				// sen data to notification provider
+				err = repo.SendNotification(tx)
+				if err != nil {
+					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+				}
 			}
 		}
 
 	}
+}
+
+func getNotify(wallet storage.Wallet) domain.TxRepository {
+	var repo domain.TxRepository
+
+	// telegram client
+	tgClientBot := notify.GetTgBot(notify.TgBotOption{
+		Debug: false,
+		Token: "",
+	})
+
+	// discord client
+	discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{})
+	if err != nil {
+		logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+	}
+
+	// smtp client
+	smtpClient := notify.NewSender(
+		os.Getenv("SMTP_EMAIL_USER"),
+		os.Getenv("SMTP_EMAIL_PASSWORD"),
+	)
+
+	for _, n := range wallet.NotifierService {
+
+		switch n.Name {
+
+		case notify.TELEGRAM:
+			tgID, err := strconv.Atoi(os.Getenv("TELEGRAM_USER_ID"))
+			if err != nil {
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			}
+			repo = domain.NewTxRepository(
+				domain.ExternalOptions{
+					Type:              n.Name,
+					DstNotificationID: int64(tgID),
+				},
+				tgClientBot,
+			)
+		case notify.DISCORD:
+			repo = domain.NewTxRepository(
+				domain.ExternalOptions{
+					Type: n.Name,
+				},
+				discordClient,
+			)
+		case notify.SMTP:
+			repo = domain.NewTxRepository(domain.ExternalOptions{
+				Type:              n.Name,
+				DstNotificationID: 0,
+			},
+				smtpClient,
+			)
+		}
+	}
+
+	return repo
+
 }
