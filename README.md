@@ -91,7 +91,12 @@ vim wallets.json
 ]
 
 ```
+### Install redis for local enviroment
 
+```bash
+docker run --name redis -e ALLOW_EMPTY_PASSWORD=yes quay.io/bitnami/redis:latest
+
+```
 ### Usage CLI walletmectl
 
 ```bash
