@@ -146,7 +146,7 @@ Usage:
   walletmectl bb8 [flags]
 
 Flags:
-      --exporter string        select a exporter to send data (default "redis")
+      --source string          select a wallets data source from (json|db) (default "json")
   -h, --help                   help for bb8
       --timer string           select a time duration to watch all txs (default "1s")
       --wallets::name string   select the name of wallet.json file (default "wallets.json")
@@ -164,8 +164,11 @@ Usage:
   walletmectl r2d2 [flags]
 
 Flags:
+      --group::name string     select a name for your consumer group
   -h, --help              help for r2d2
-      --notifier string   select a provider to send notifications (default "telegram")
+      --source string          select a wallets data source from (json|db) (default "json")
+      --wallets::name string   select the name of wallet.json file (default "wallets.json")
+      --wallets::path string   select the path of wallet.json file (default "/path/<bin file>")
 
 ```
 
