@@ -3,6 +3,7 @@ package exporters
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -54,10 +55,10 @@ func ExportToJSON(path, filename string, value interface{}) error {
 }
 
 // ExportToRedisStream ...
-func ExportToRedisStream(rdb *redis.Client, key, symbol string, value map[string]interface{}) error {
+func ExportToRedisStream(rdb *redis.Client, key, address string, value map[string]interface{}) error {
 
 	err := rdb.XAdd(context.TODO(), &redis.XAddArgs{
-		Stream: key + ":" + symbol,
+		Stream: fmt.Sprintf("%s::%s", key, address),
 		Values: value,
 	}).Err()
 
