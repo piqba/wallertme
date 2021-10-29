@@ -51,8 +51,7 @@ SMTP_EMAIL_RECEIVER=test@gmail.com
 SMTP_EMAIL_USER=test@gmail.com
 SMTP_EMAIL_PASSWORD="password"
 BOT_TOKEN=telegram:token
-DISCORD_WEBHOOK=https://discordapp.com/api/webhooks/idhook
-TELEGRAM_USER_ID=telegramID(only a number)
+
 
 ```
 
