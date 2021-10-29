@@ -1,20 +1,38 @@
 [
     {
         "address": "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx",
-        "lastTx": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
         "symbol": "ADA",
-        "networkType": "CardanoTestNet"
+        "is_active": true,
+        "notifier_service": [
+            {
+                "name": "telegram",
+                "user_id": "927486129"
+            }
+        ],
+        "network_type": "CardanoTestNet"
     },
     {
         "address": "addr_test1qq5287luxzj5l4lequrqdp5ln76ver4uls3z0m5ykr5gqsv0vxzrwcq5dmmn9e09rvgttzgrngmpxkguy7220r0u0ljqzuww7g",
-        "lastTx": "5ef1187f5e125090675a3c2d2d2cee359aaf6941df625db598ec996ab1011f55",
         "symbol": "ADA",
-        "networkType": "CardanoTestNet"
+        "is_active": true,
+        "notifier_service": [
+            {
+                "name": "telegram",
+                "user_id": "927486129"
+            }
+        ],
+        "network_type": "CardanoTestNet"
     },
     {
         "address": "9hZaTvCVMcfbheTzebkeGR6Xi2EzMqTtPasbhGoPB94C",
-        "lastTx": "3EDaSfApwCzkHcZdLBnMdDAyo9aVV9KaxCxSdmcMuJoq4sAoedb7ziHwBwBDe2jNxjnzZC5oAb9YFfGiHSs6taGu",
         "symbol": "SOL",
-        "networkType": "SolanaDevNet"
+        "is_active": true,
+        "notifier_service": [
+            {
+                "name": "telegram",
+                "user_id": "927486129"
+            }
+        ],
+        "network_type": "SolanaDevNet"
     }
 ]
