@@ -2,7 +2,6 @@ package bb8
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"reflect"
 	"time"
@@ -57,48 +56,33 @@ func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 
 		tx := data.(ResultLastTxADA)
 
-		switch r.exporterType {
-		case exporters.JSONFILE:
-			fileName := fmt.Sprintf("export_%s_%d.json", symbol, time.Now().UnixNano())
-
-			return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
-		case exporters.REDIS:
-
-			value, err := tx.ToMAP()
-			if err != nil {
-				return err
-			}
-
-			return exporters.ExportToRedisStream(
-				r.clientRdb,
-				exporters.TXS_STREAM_KEY,
-				symbol,
-				value,
-			)
+		value, err := tx.ToMAP()
+		if err != nil {
+			return err
 		}
+
+		return exporters.ExportToRedisStream(
+			r.clientRdb,
+			exporters.TXS_STREAM_KEY,
+			tx.Addr,
+			value,
+		)
+
 	} else if t == reflect.TypeOf(ResultLastTxSOL{}) {
 		tx := data.(ResultLastTxSOL)
 
-		switch r.exporterType {
-		case exporters.JSONFILE:
-			fileName := fmt.Sprintf("export_%s_%d.json", symbol, time.Now().UnixNano())
-
-			return exporters.ExportToJSON(cwd, fileName, tx.ToJSON())
-		case exporters.REDIS:
-
-			value, err := tx.ToMAP()
-			if err != nil {
-				return err
-			}
-
-			return exporters.ExportToRedisStream(
-				r.clientRdb,
-				exporters.TXS_STREAM_KEY,
-				symbol,
-				value,
-			)
-
+		value, err := tx.ToMAP()
+		if err != nil {
+			return err
 		}
+
+		return exporters.ExportToRedisStream(
+			r.clientRdb,
+			exporters.TXS_STREAM_KEY,
+			tx.Addr,
+			value,
+		)
+
 	}
 
 	return nil
