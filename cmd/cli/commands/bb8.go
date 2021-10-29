@@ -29,6 +29,7 @@ var producerCmd = &cobra.Command{
 	Use:   "bb8",
 	Short: "Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)",
 	Run: func(cmd *cobra.Command, args []string) {
+		// flags
 		exporter, err := cmd.Flags().GetString(flagExporter)
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
@@ -51,6 +52,7 @@ var producerCmd = &cobra.Command{
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
 
+		// Options to load wallets
 		wallets, err := readWalletsJsonFile(walletsPath, walletsName)
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
@@ -126,14 +128,18 @@ func readWalletsJsonFile(path, filename string) ([]map[string]interface{}, error
 }
 
 func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType string) {
+
 	symbol := wallet["symbol"].(string)
+	address := wallet["address"].(string)
+	networkType := wallet["networkType"].(string)
+
 	switch symbol {
 	case "ADA":
-		addrInfo := lastTXForADA(wallet["networkType"].(string), wallet["address"].(string))
+		addrInfo := lastTXForADA(networkType, address)
 
 		lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
 		tx := domain.ResultLastTxADA{
-			Addr:          wallet["address"].(string),
+			Addr:          address,
 			CtbID:         lastTX.CtbID,
 			CtbTimeIssued: fmt.Sprintf("%d", lastTX.CtbTimeIssued),
 			FromAddr:      lastTX.CtbOutputs[0].CtaAddress,
@@ -144,15 +150,15 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 		switch exporterType {
 		case exporters.REDIS:
 
-			lastTXFromRdb, err := repo.Get(context.TODO(), wallet["address"].(string))
+			lastTXFromRdb, err := repo.Get(context.TODO(), address)
 			if err != nil {
-				logger.LogError(errors.Errorf("main:%s", err).Error())
+				logger.LogError(errors.Errorf("bb8: %s", err).Error())
 			}
 			if tx.CtbID != lastTXFromRdb {
 
-				if wallet["address"].(string) == tx.FromAddr {
+				if address == tx.FromAddr {
 					tx.TypeTx = TxSender
-				} else if wallet["address"].(string) == tx.ToAddr {
+				} else if address == tx.ToAddr {
 					tx.TypeTx = TxReceiver
 				}
 
@@ -162,24 +168,24 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 						logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
 						return
 					}
-					logger.LogError(errors.Errorf("main:%s", err).Error())
+					logger.LogError(errors.Errorf("bb8: %s", err).Error())
 				}
-				err = repo.Set(context.TODO(), wallet["address"].(string), tx.CtbID, 0)
+				err = repo.Set(context.TODO(), address, tx.CtbID, 0)
 				if err != nil {
-					logger.LogError(errors.Errorf("main:%s", err).Error())
+					logger.LogError(errors.Errorf("bb8: %s", err).Error())
 				}
 
 			}
 		case exporters.JSONFILE:
 			err := repo.ExportData(tx, symbol)
 			if err != nil {
-				logger.LogError(errors.Errorf("main:%s", err).Error())
+				logger.LogError(errors.Errorf("bb8: %s", err).Error())
 			}
 		}
 	case "SOL":
-		addrInfo := lastTXForSOL(wallet["networkType"].(string), wallet["address"].(string))
+		addrInfo := lastTXForSOL(networkType, address)
 		tx := domain.ResultLastTxSOL{
-			Addr:      wallet["address"].(string),
+			Addr:      address,
 			TxID:      addrInfo.Result.Transaction.Signatures[0],
 			Timestamp: fmt.Sprintf("%v", addrInfo.Result.BlockTime),
 			FromAddr:  addrInfo.Result.Transaction.Message.AccountKeys[0],
@@ -187,23 +193,23 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 			Balance:   fmt.Sprintf("%v", addrInfo.Result.Meta.PostBalances[0]),
 			Ammount:   fmt.Sprintf("%v", addrInfo.Result.Meta.PreBalances[0]-addrInfo.Result.Meta.PostBalances[0]),
 		}
-		if wallet["address"].(string) == tx.FromAddr {
+		if address == tx.FromAddr {
 			tx.TypeTx = TxSender
-		} else if wallet["address"].(string) == tx.ToAddr {
+		} else if address == tx.ToAddr {
 			tx.TypeTx = TxReceiver
 		}
 		switch exporterType {
 		case exporters.REDIS:
 
-			lastTXFromRdb, err := repo.Get(context.TODO(), wallet["address"].(string))
+			lastTXFromRdb, err := repo.Get(context.TODO(), address)
 			if err != nil {
-				logger.LogError(errors.Errorf("main:%s", err).Error())
+				logger.LogError(errors.Errorf("bb8: %s", err).Error())
 			}
 			if tx.TxID != lastTXFromRdb {
 
-				if wallet["address"].(string) == tx.FromAddr {
+				if address == tx.FromAddr {
 					tx.TypeTx = TxSender
-				} else if wallet["address"].(string) == tx.ToAddr {
+				} else if address == tx.ToAddr {
 					tx.TypeTx = TxReceiver
 				}
 
@@ -213,18 +219,18 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 						logger.LogWarn(errors.Errorf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr), err).Error())
 						return
 					}
-					logger.LogError(errors.Errorf("main:%s", err).Error())
+					logger.LogError(errors.Errorf("bb8: %s", err).Error())
 				}
-				err = repo.Set(context.TODO(), wallet["address"].(string), tx.TxID, 0)
+				err = repo.Set(context.TODO(), address, tx.TxID, 0)
 				if err != nil {
-					logger.LogError(errors.Errorf("main:%s", err).Error())
+					logger.LogError(errors.Errorf("bb8: %s", err).Error())
 				}
 
 			}
 		case exporters.JSONFILE:
 			err := repo.ExportData(tx, symbol)
 			if err != nil {
-				logger.LogError(errors.Errorf("main:%s", err).Error())
+				logger.LogError(errors.Errorf("bb8: %s", err).Error())
 			}
 		}
 	}
@@ -236,12 +242,12 @@ func lastTXForADA(networkType, address string) web3.AddrSumary {
 		NetworkType: networkType,
 	})
 	if err != nil {
-		logger.LogError(errors.Errorf("main:%s", err).Error())
+		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
 
 	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
-		logger.LogError(errors.Errorf("main:%s", err).Error())
+		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
 
 	return sumary
@@ -251,7 +257,7 @@ func lastTXForSOL(networkType, address string) web3.TxInfo {
 		NetworkType: networkType,
 	})
 	if err != nil {
-		logger.LogError(errors.Errorf("main:%s", err).Error())
+		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
 
 	payloadLastTx := web3.PayloadReqJSONRPC{
@@ -267,7 +273,7 @@ func lastTXForSOL(networkType, address string) web3.TxInfo {
 	}
 	lastTx, err := solanaApi.LastTxByAddress(context.Background(), payloadLastTx)
 	if err != nil {
-		logger.LogError(errors.Errorf("main:%s", err).Error())
+		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
 
 	// get tx info by last signature
@@ -282,7 +288,7 @@ func lastTXForSOL(networkType, address string) web3.TxInfo {
 	}
 	infoTx, err := solanaApi.InfoByTx(context.Background(), payloadInfoTx)
 	if err != nil {
-		logger.LogError(errors.Errorf("main:%s", err).Error())
+		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
 	return infoTx
 }
