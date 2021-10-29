@@ -46,17 +46,3 @@ func PostgreSQLConnection() (*sqlx.DB, error) {
 
 	return db, nil
 }
-
-// InsertToPostgresql ...
-func InsertToPostgresql(db *sqlx.DB, blockID int, value string) error {
-	tx := db.MustBegin()
-	query := "INSERT INTO last_txs (blockid, data) VALUES ($1, $2) ON CONFLICT (blockid) DO NOTHING"
-
-	tx.MustExec(
-		query,
-		blockID,
-		value,
-	)
-	return tx.Commit()
-
-}
