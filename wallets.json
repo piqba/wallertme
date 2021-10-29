@@ -29,8 +29,8 @@
         "is_active": true,
         "notifier_service": [
             {
-                "name": "telegram",
-                "user_id": "927486129"
+                "name": "discord",
+                "user_id": "https://discordapp.com/api/webhooks/900756385724248164/mXzzQYggaMw2JlTMnqTv4CwnT490aEsqBme3Xu8H2h67xj_8O-_LspcjihfNxWuXW7Zo"
             }
         ],
         "network_type": "SolanaDevNet"
