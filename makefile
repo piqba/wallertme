@@ -27,3 +27,7 @@ compress:
 # Only work if you have goreleaser instaled
 releaser:
 	goreleaser release --snapshot --rm-dist
+
+# Run redis for local env
+redis:
+	podman run --name redis --rm -e ALLOW_EMPTY_PASSWORD=yes -p 6379:6379 quay.io/bitnami/redis:latest
