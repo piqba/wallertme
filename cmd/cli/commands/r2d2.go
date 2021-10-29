@@ -209,12 +209,6 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 		Token: "",
 	})
 
-	// discord client
-	discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{})
-	if err != nil {
-		logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
-	}
-
 	// smtp client
 	smtpClient := notify.NewSender(
 		os.Getenv("SMTP_EMAIL_USER"),
@@ -226,7 +220,7 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 		switch n.Name {
 
 		case notify.TELEGRAM:
-			tgID, err := strconv.Atoi(os.Getenv("TELEGRAM_USER_ID"))
+			tgID, err := strconv.Atoi(n.UserID)
 			if err != nil {
 				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 			}
@@ -238,6 +232,13 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 				tgClientBot,
 			)
 		case notify.DISCORD:
+			// discord client
+			discordClient, err := notify.NewDiscordClient(notify.DiscordClientOptions{
+				ServerHook: n.UserID,
+			})
+			if err != nil {
+				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+			}
 			repo = domain.NewTxRepository(
 				domain.ExternalOptions{
 					Type: n.Name,
