@@ -17,6 +17,7 @@ type ResultLastTxADA struct {
 	Balance       string `json:"balance,omitempty"`
 	Ammount       string `json:"ammount,omitempty"`
 	TypeTx        string `json:"type_tx,omitempty"`
+	Symbol        string `json:"symbol,omitempty"`
 }
 
 // ToJSON ...
