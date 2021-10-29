@@ -3,12 +3,12 @@ wallet alert me is an app off-chain. It's a space where the user can register th
 
 
 
-## How to interact with app for testing reasson 
+## How to interact with app for testing reasson
 
 
 For the Solana blockchain, we need to have a wallet. How you can get a wallet?
 
-Go to [pahtom wallet](https://phantom.app/) install and select Devnet network.
+Go to [phatom wallet](https://phantom.app/) install and select Devnet network.
 
 Then if you are new in this ecosystem like me, I recomend you read this posts [solana cli tool](https://docs.solana.com/cli/install-solana-cli-tools) and then follow this steps [Send and Receive Tokens](https://docs.solana.com/cli/transfer-tokens) for testing propourse.
 
