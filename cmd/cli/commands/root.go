@@ -9,13 +9,12 @@ import (
 )
 
 const (
-	flagNotifier      = "notifier"
-	flagDataSource    = "source"
-	flagConsumerGroup = "group::name"
-	flagTimer         = "timer"
-	flagWatcher       = "watcher"
-	flagWalletsPath   = "wallets::path"
+	flagConsumerGroup = "wallets::groupname"
+	flagSource        = "wallets::source"
+	flagTimer         = "wallets::timer"
 	flagWalletsName   = "wallets::name"
+	flagWalletsPath   = "wallets::path"
+	flagWatcher       = "wallets::watcher"
 )
 
 // rootCmd represents the base command when called without any subcommands
