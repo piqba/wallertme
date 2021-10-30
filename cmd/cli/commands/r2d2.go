@@ -51,7 +51,7 @@ var consumerCmd = &cobra.Command{
 	Short: "Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)",
 	Run: func(cmd *cobra.Command, args []string) {
 		// flags
-		source, err := cmd.Flags().GetString(flagDataSource)
+		source, err := cmd.Flags().GetString(flagSource)
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
@@ -70,9 +70,15 @@ var consumerCmd = &cobra.Command{
 		// end flags
 
 		// load wallets from source migrate to factory pattern
+		pgx, err := storage.PostgreSQLConnection()
+		if err != nil {
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+
+		}
 		dataSource := storage.NewSource(source, storage.OptionsSource{
 			FileName: walletsName,
 			PathName: walletsPath,
+			Pgx:      pgx,
 		})
 		wallets, err := dataSource.WalletsTONotify()
 		if err != nil {
@@ -137,7 +143,7 @@ var consumerCmd = &cobra.Command{
 }
 
 func init() {
-	consumerCmd.Flags().String(flagDataSource, "json", "select a wallets data source from (json|db)")
+	consumerCmd.Flags().String(flagSource, "json", "select a wallets data source from (json|db)")
 	consumerCmd.Flags().String(flagConsumerGroup, "", "select a name for your consumer group")
 	consumerCmd.Flags().String(flagWalletsPath, walletsJsonPath, "select the path of wallet.json file")
 	consumerCmd.Flags().String(flagWalletsName, "wallets.json", "select the name of wallet.json file")

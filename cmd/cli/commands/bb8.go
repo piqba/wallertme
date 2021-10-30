@@ -35,7 +35,7 @@ var producerCmd = &cobra.Command{
 		signal.Notify(quit, os.Interrupt)
 
 		// flags
-		source, err := cmd.Flags().GetString(flagDataSource)
+		source, err := cmd.Flags().GetString(flagSource)
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
@@ -58,9 +58,15 @@ var producerCmd = &cobra.Command{
 		// END FLAGS
 
 		// load wallets from source migrate to factory pattern
+		pgx, err := storage.PostgreSQLConnection()
+		if err != nil {
+			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+
+		}
 		dataSource := storage.NewSource(source, storage.OptionsSource{
 			FileName: walletsName,
 			PathName: walletsPath,
+			Pgx:      pgx,
 		})
 		wallets, err := dataSource.Wallets()
 		if err != nil {
@@ -115,7 +121,7 @@ var producerCmd = &cobra.Command{
 }
 
 func init() {
-	producerCmd.Flags().String(flagDataSource, "json", "select a wallets data source from (json|db)")
+	producerCmd.Flags().String(flagSource, "json", "select a wallets data source from (json|db)")
 	producerCmd.Flags().String(flagTimer, "1s", "select a time duration to watch all txs")
 	producerCmd.Flags().Bool(flagWatcher, false, "select true|false if you want to run this task periodicaly")
 	producerCmd.Flags().String(flagWalletsPath, walletsJsonPath, "select the path of wallet.json file")
