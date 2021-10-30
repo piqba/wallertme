@@ -146,12 +146,12 @@ Usage:
   walletmectl bb8 [flags]
 
 Flags:
-      --source string          select a wallets data source from (json|db) (default "json")
-  -h, --help                   help for bb8
-      --timer string           select a time duration to watch all txs (default "1s")
-      --wallets::name string   select the name of wallet.json file (default "wallets.json")
-      --wallets::path string   select the path of wallet.json file (default "/path/<bin file>")
-      --watcher                select true|false if you want to run this task periodicaly
+  -h, --help                     help for bb8
+      --wallets::name string     select the name of wallet.json file (default "wallets.json")
+      --wallets::path string     select the path of wallet.json file (default "/path/<bin file>")
+      --wallets::source string   select a wallets data source from (json|db) (default "json")
+      --wallets::timer string    select a time duration to watch all txs (default "1s")
+      --wallets::watcher         select true|false if you want to run this task periodicaly
 
 
 ```
@@ -164,11 +164,11 @@ Usage:
   walletmectl r2d2 [flags]
 
 Flags:
-      --group::name string     select a name for your consumer group
-  -h, --help              help for r2d2
-      --source string          select a wallets data source from (json|db) (default "json")
-      --wallets::name string   select the name of wallet.json file (default "wallets.json")
-      --wallets::path string   select the path of wallet.json file (default "/path/<bin file>")
+  -h, --help                        help for r2d2
+      --wallets::groupname string   select a name for your consumer group
+      --wallets::name string        select the name of wallet.json file (default "wallets.json")
+      --wallets::path string        select the path of wallet.json file (default "/path/<bin file>")
+      --wallets::source string      select a wallets data source from (json|db) (default "json")
 
 ```
 
