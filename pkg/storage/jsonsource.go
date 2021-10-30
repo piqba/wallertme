@@ -25,19 +25,6 @@ func WalletsFromJsonToMAP(path, filename string) ([]map[string]interface{}, erro
 	return result, nil
 }
 
-type Wallet struct {
-	Address         string            `json:"address"`
-	Symbol          string            `json:"symbol"`
-	IsActive        bool              `json:"is_active"`
-	NotifierService []NotifierService `json:"notifier_service"`
-	NetworkType     string            `json:"network_type"`
-}
-
-type NotifierService struct {
-	Name   string `json:"name"`
-	UserID string `json:"user_id"`
-}
-
 // WalletsFromJsonToStruct read json filename and path
 func WalletsFromJsonToStruct(path, filename string) ([]Wallet, error) {
 	jsonFile, err := os.Open(fmt.Sprintf("%s/%s", path, filename))
