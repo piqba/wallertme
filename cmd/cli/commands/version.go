@@ -7,23 +7,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	buildTime    string
-	version      string
-	versionHash  string
-	otelNameBb8  = "bb8"
-	otelNameR2D2 = "r2d2"
-	otelVersion  = "v0.4.0"
-	otelNameEnv  = "dev"
-)
-
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of wallertmectl",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version:\t%s\n", version)
-		fmt.Printf("Version Git Hash:\t%s\n", shortGitCommit(versionHash))
-		fmt.Printf("Build time:\t%s\n", buildTime)
+		fmt.Printf("Version:\t%s\n", Version)
+		fmt.Printf("Version Git Hash:\t%s\n", shortGitCommit(VersionHash))
+		fmt.Printf("Build time:\t%s\n", BuildTime)
 		os.Exit(0)
 	},
 }

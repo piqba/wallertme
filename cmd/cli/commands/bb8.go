@@ -51,9 +51,9 @@ var producerCmd = &cobra.Command{
 			trace.WithBatcher(expo),
 			trace.WithResource(
 				otelify.NewResource(
-					otelNameBb8,
-					otelVersion,
-					otelNameEnv,
+					OtelNameBb8,
+					OtelVersion,
+					OtelNameEnv,
 				),
 			),
 		)

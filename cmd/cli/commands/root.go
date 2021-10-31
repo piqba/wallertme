@@ -8,15 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	flagConsumerGroup = "wallets::groupname"
-	flagSource        = "wallets::source"
-	flagTimer         = "wallets::timer"
-	flagWalletsName   = "wallets::name"
-	flagWalletsPath   = "wallets::path"
-	flagWatcher       = "wallets::watcher"
-)
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wallertmectl",

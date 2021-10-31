@@ -6,8 +6,6 @@ require github.com/hashicorp/go-retryablehttp v0.7.0
 
 require (
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
-	go.opentelemetry.io/otel/sdk v1.1.0 // indirect
-	go.opentelemetry.io/otel/trace v1.1.0 // indirect
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 )
 
@@ -47,4 +45,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opentelemetry.io/otel v1.1.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.1.0
+	go.opentelemetry.io/otel/sdk v1.1.0
+	go.opentelemetry.io/otel/trace v1.1.0
 )

@@ -31,7 +31,8 @@ builds:
     # Custom ldflags templates.
     # Default is `-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser`.
     ldflags:
-      - -s -w -X commands.version={{.Version}} -X commands.versionHash={{.Commit}} -X commands.buildTime={{.Date}}
+      - -s -w -X github.com/piqba/wallertme/cmd/cli/commands.Version={{.Version}} -X github.com/piqba/wallertme/cmd/cli/commands.VersionHash={{.Commit}} -X github.com/piqba/wallertme/cmd/cli/commands.BuildTime={{.Date}}
+      - -s -w -X github.com/piqba/wallertme/cmd/cli/commands.OtelNameBb8="bb8" -X github.com/piqba/wallertme/cmd/cli/commands.OtelNameR2D2="r2d2" -X github.com/piqba/wallertme/cmd/cli/commands.OtelVersion={{.Version}} -X main.OtelNameEnv="dev"
 
 
     env:
