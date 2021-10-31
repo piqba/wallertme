@@ -26,7 +26,7 @@ const (
 
 // Notifier ...
 type Notifier interface {
-	SendNotification(data interface{}) error
+	SendNotification(ctx context.Context, data interface{}) error
 }
 
 // SendMessageTG send msg to telegram
