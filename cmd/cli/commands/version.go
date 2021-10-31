@@ -8,9 +8,13 @@ import (
 )
 
 var (
-	buildTime   string
-	version     string
-	versionHash string
+	buildTime    string
+	version      string
+	versionHash  string
+	otelNameBb8  = "bb8"
+	otelNameR2D2 = "r2d2"
+	otelVersion  = "v0.4.0"
+	otelNameEnv  = "dev"
 )
 
 var versionCmd = &cobra.Command{

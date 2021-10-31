@@ -70,9 +70,9 @@ var consumerCmd = &cobra.Command{
 			trace.WithBatcher(expo),
 			trace.WithResource(
 				otelify.NewResource(
-					"bb8",
-					"v0.3.2",
-					"dev",
+					otelNameR2D2,
+					otelVersion,
+					otelNameEnv,
 				),
 			),
 		)
