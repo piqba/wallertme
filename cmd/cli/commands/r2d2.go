@@ -70,7 +70,7 @@ var consumerCmd = &cobra.Command{
 		// end flags
 
 		// load wallets from source migrate to factory pattern
-		pgx, err := storage.PostgreSQLConnection()
+		pgx, err := storage.PostgreSQLConnection(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 
@@ -80,14 +80,14 @@ var consumerCmd = &cobra.Command{
 			PathName: walletsPath,
 			Pgx:      pgx,
 		})
-		wallets, err := dataSource.WalletsTONotify()
+		wallets, err := dataSource.WalletsTONotify(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
 		// end Load wallets
 
 		// vars
-		redisDbClient := exporters.GetRedisDbClient()
+		redisDbClient := exporters.GetRedisDbClient(context.Background())
 
 		streams := []string{}
 		// create automatically streams key txs::addr
@@ -128,6 +128,7 @@ var consumerCmd = &cobra.Command{
 				for _, wallet := range wallets {
 
 					Exec(
+						context.Background(),
 						redisDbClient,
 						groupName,
 						it,
@@ -153,6 +154,7 @@ func init() {
 }
 
 func Exec(
+	ctx context.Context,
 	rdb *redis.Client,
 	consumersGroup string,
 	stream redis.XStream,
@@ -182,7 +184,7 @@ func Exec(
 			if wallet.Address == tx.Addr {
 				repo := getNotify(wallet)
 				// sen data to notification provider
-				err = repo.SendNotification(tx)
+				err = repo.SendNotification(ctx, tx)
 				if err != nil {
 					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 				}
@@ -196,7 +198,7 @@ func Exec(
 			if wallet.Address == tx.Addr {
 				repo := getNotify(wallet)
 				// sen data to notification provider
-				err = repo.SendNotification(tx)
+				err = repo.SendNotification(ctx, tx)
 				if err != nil {
 					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 				}
@@ -210,10 +212,12 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 	var repo domain.TxRepository
 
 	// telegram client
-	tgClientBot := notify.GetTgBot(notify.TgBotOption{
-		Debug: false,
-		Token: "",
-	})
+	tgClientBot := notify.GetTgBot(
+		context.Background(),
+		notify.TgBotOption{
+			Debug: false,
+			Token: "",
+		})
 
 	// smtp client
 	smtpClient := notify.NewSender(

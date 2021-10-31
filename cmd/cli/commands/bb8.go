@@ -58,7 +58,7 @@ var producerCmd = &cobra.Command{
 		// END FLAGS
 
 		// load wallets from source migrate to factory pattern
-		pgx, err := storage.PostgreSQLConnection()
+		pgx, err := storage.PostgreSQLConnection(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 
@@ -68,7 +68,7 @@ var producerCmd = &cobra.Command{
 			PathName: walletsPath,
 			Pgx:      pgx,
 		})
-		wallets, err := dataSource.Wallets()
+		wallets, err := dataSource.Wallets(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
@@ -76,7 +76,7 @@ var producerCmd = &cobra.Command{
 
 		// Define repository to export data
 		var repo domain.TxRepository
-		rdb := exporters.GetRedisDbClient()
+		rdb := exporters.GetRedisDbClient(context.Background())
 		repo = domain.NewTxRepository(exporters.REDIS, rdb)
 
 		// Logic for watcher periodicaly
@@ -104,7 +104,7 @@ var producerCmd = &cobra.Command{
 				wg.Add(len(wallets))
 				for _, it := range wallets {
 					go func(wallet storage.Wallet) {
-						Exce(repo, wallet)
+						Exce(context.Background(), repo, wallet)
 						wg.Done()
 					}(it)
 				}
@@ -131,7 +131,7 @@ func init() {
 }
 
 // Exce excecute proccessing functions
-func Exce(repo domain.TxRepository, wallet storage.Wallet) {
+func Exce(ctx context.Context, repo domain.TxRepository, wallet storage.Wallet) {
 
 	symbol := wallet.Symbol
 	address := wallet.Address
@@ -168,7 +168,7 @@ func Exce(repo domain.TxRepository, wallet storage.Wallet) {
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx, symbol)
+				err := repo.ExportData(ctx, tx)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
@@ -213,7 +213,7 @@ func Exce(repo domain.TxRepository, wallet storage.Wallet) {
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx, symbol)
+				err := repo.ExportData(ctx, tx)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(errors.Errorf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr), err).Error())
