@@ -19,7 +19,7 @@ const (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "walletmectl",
+	Use:   "wallertmectl",
 	Short: "A cli to send tx data from (SOLANA|CARDANO) blockchain to DISCORD|TELEGRAM|SMTP",
 	Long: `Wallertme ctl is a tool focused on: 
 	Send tx data from (SOLANA|CARDANO) blockchain to a queue like (REDIS) streams and then send this information

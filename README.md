@@ -122,7 +122,7 @@ Wallertme ctl is a tool focused on:
 	to DISCORD|TELEGRAM|SMTP
 
 Usage:
-  walletmectl [command]
+  wallertmectl [command]
 
 Available Commands:
   bb8         Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)
@@ -134,7 +134,7 @@ Available Commands:
 Flags:
   -h, --help   help for walletmectl
 
-Use "walletmectl [command] --help" for more information about a command.
+Use "wallertmectl [command] --help" for more information about a command.
 
 ```
 ### BB8 module
