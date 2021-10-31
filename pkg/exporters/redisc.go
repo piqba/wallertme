@@ -7,6 +7,9 @@ import (
 
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/logger"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -24,11 +27,13 @@ var (
 )
 
 // GetRedisDbClient ...
-func GetRedisDbClient() *redis.Client {
-
+func GetRedisDbClient(ctx context.Context) *redis.Client {
+	_, span := otel.Tracer(nameRedisClient).Start(ctx, "GetRedisDbClient")
+	defer span.End()
 	clientInstance := redis.NewClient(&redis.Options{
-		Addr:         os.Getenv("REDIS_URI"),  // use default Addr
-		Password:     os.Getenv("REDIS_PASS"), // no password set
+		Addr:         os.Getenv("REDIS_URI"),
+		Username:     "",
+		Password:     os.Getenv("REDIS_PASS"),
 		DB:           0,
 		DialTimeout:  60 * time.Second,
 		ReadTimeout:  60 * time.Second,
@@ -37,7 +42,11 @@ func GetRedisDbClient() *redis.Client {
 
 	_, err := clientInstance.Ping(context.TODO()).Result()
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		logger.LogError(ErrRedisDbCheckConn.Error())
 	}
+	span.SetAttributes(attribute.String("create.redis.client", "Success"))
+
 	return clientInstance
 }
