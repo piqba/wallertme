@@ -29,7 +29,7 @@ const (
 
 // Exporter ...
 type Exporter interface {
-	ExportData(data interface{}) error
+	ExportData(ctx context.Context, data interface{}) error
 }
 
 // ExportToJSON ...
