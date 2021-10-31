@@ -12,12 +12,15 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
 	domain "github.com/piqba/wallertme/internal/r2d2/domain"
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/logger"
 	"github.com/piqba/wallertme/pkg/notify"
+	"github.com/piqba/wallertme/pkg/otelify"
 	"github.com/piqba/wallertme/pkg/storage"
 	"github.com/spf13/cobra"
 )
@@ -50,6 +53,31 @@ var consumerCmd = &cobra.Command{
 	Use:   "r2d2",
 	Short: "Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)",
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Pass to flag variable Write telemetry data to a file.
+		f, err := os.Create("traces.r2d2.txt")
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		defer f.Close()
+
+		expo, err := otelify.NewExporter(f)
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		tp := trace.NewTracerProvider(
+			trace.WithBatcher(expo),
+			trace.WithResource(
+				otelify.NewResource(
+					"bb8",
+					"v0.3.2",
+					"dev",
+				),
+			),
+		)
+
+		otel.SetTracerProvider(tp)
 		// flags
 		source, err := cmd.Flags().GetString(flagSource)
 		if err != nil {

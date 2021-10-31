@@ -9,10 +9,13 @@ import (
 	"time"
 
 	domain "github.com/piqba/wallertme/internal/bb8/domain"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/logger"
+	"github.com/piqba/wallertme/pkg/otelify"
 	"github.com/piqba/wallertme/pkg/storage"
 	"github.com/piqba/wallertme/pkg/web3"
 	"github.com/spf13/cobra"
@@ -31,6 +34,31 @@ var producerCmd = &cobra.Command{
 	Use:   "bb8",
 	Short: "Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)",
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Pass to flag variable Write telemetry data to a file.
+		f, err := os.Create("traces.bb8.txt")
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		defer f.Close()
+
+		expo, err := otelify.NewExporter(f)
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		tp := trace.NewTracerProvider(
+			trace.WithBatcher(expo),
+			trace.WithResource(
+				otelify.NewResource(
+					"bb8",
+					"v0.3.2",
+					"dev",
+				),
+			),
+		)
+
+		otel.SetTracerProvider(tp)
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)
 
@@ -93,6 +121,11 @@ var producerCmd = &cobra.Command{
 			select {
 			case sig := <-quit:
 
+				defer func() {
+					if err := tp.Shutdown(context.Background()); err != nil {
+						logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+					}
+				}()
 				logger.LogInfo(fmt.Sprintf("bb8: app is shutting down %v", sig.String()))
 				_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 				run = false
