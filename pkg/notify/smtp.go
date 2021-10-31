@@ -2,10 +2,15 @@ package notify
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"mime/quotedprintable"
 	"net/smtp"
 	"strings"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 /**
@@ -35,8 +40,9 @@ func NewSender(Username, Password string) Sender {
 }
 
 // SendMail send mail to an array of dst
-func (sender Sender) SendMail(Dest []string, Subject, bodyMessage string) {
-
+func (sender Sender) SendMail(ctx context.Context, Dest []string, Subject, bodyMessage string) {
+	_, span := otel.Tracer(nameNotifierSMTP).Start(ctx, "SendMail")
+	defer span.End()
 	msg := "From: " + sender.User + "\n" +
 		"To: " + strings.Join(Dest, ",") + "\n" +
 		"Subject: " + Subject + "\n" + bodyMessage
@@ -46,10 +52,11 @@ func (sender Sender) SendMail(Dest []string, Subject, bodyMessage string) {
 		sender.User, Dest, []byte(msg))
 
 	if err != nil {
-
-		fmt.Printf("smtp error: %s", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return
 	}
+	span.SetAttributes(attribute.String("notifier.sendmail.client", "success"))
 
 }
 

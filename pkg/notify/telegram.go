@@ -1,10 +1,13 @@
 package notify
 
 import (
+	"context"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/piqba/wallertme/pkg/logger"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // TgBotOption object options for telegram service
@@ -14,20 +17,23 @@ type TgBotOption struct {
 }
 
 // GetTgBot get an instance of tgBot
-func GetTgBot(option TgBotOption) *tgbotapi.BotAPI {
+func GetTgBot(ctx context.Context, option TgBotOption) *tgbotapi.BotAPI {
+	_, span := otel.Tracer(nameNotifierTG).Start(ctx, "GetTgBot")
+	defer span.End()
 	var token string
 	if option.Token == "" {
 		token = os.Getenv("BOT_TOKEN")
 	}
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		logger.LogError(err.Error())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 	}
 
 	if option.Debug {
 		bot.Debug = option.Debug
 	}
-	logger.LogInfo(bot.Self.FirstName)
+	span.SetAttributes(attribute.String("notifier.telegram.client", bot.Self.FirstName))
 
 	return bot
 }
