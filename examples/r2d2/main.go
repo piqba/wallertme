@@ -34,9 +34,9 @@ func init() {
 
 func main() {
 	log.Println("Consumer started")
-	redisDbClient := exporters.GetRedisDbClient()
+	redisDbClient := exporters.GetRedisDbClient(context.TODO())
 	// telegram client
-	tgClientBot := notify.GetTgBot(notify.TgBotOption{
+	tgClientBot := notify.GetTgBot(context.TODO(), notify.TgBotOption{
 		Debug: false,
 		Token: "",
 	})
@@ -110,13 +110,14 @@ func main() {
 		}
 
 		for _, it := range entries {
-			Exec(redisDbClient, consumersGroup, it, repo)
+			Exec(context.TODO(), redisDbClient, consumersGroup, it, repo)
 		}
 
 	}
 }
 
 func Exec(
+	ctx context.Context,
 	rdb *redis.Client,
 	consumersGroup string,
 	stream redis.XStream,
@@ -145,7 +146,7 @@ func Exec(
 				logger.LogError(err.Error())
 			}
 			// sen data to notification provider
-			err = repo.SendNotification(tx)
+			err = repo.SendNotification(ctx, tx)
 			if err != nil {
 				logger.LogError(err.Error())
 			}
@@ -156,7 +157,7 @@ func Exec(
 				logger.LogError(err.Error())
 			}
 			// sen data to notification provider
-			err = repo.SendNotification(tx)
+			err = repo.SendNotification(ctx, tx)
 			if err != nil {
 				logger.LogError(err.Error())
 			}
