@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // LastTxByAddr get last txs by address
@@ -34,22 +38,33 @@ func (r *ResultTxByAddressSOL) ToJSON() string {
 
 // LastTxByAddress get last TXs by address
 func (c *apiClient) LastTxByAddress(ctx context.Context, payload PayloadReqJSONRPC) (lastTx LastTxByAddr, err error) {
-
+	_, span := otel.Tracer(nameSOL).Start(ctx, "LastTxByAddress")
+	defer span.End()
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return lastTx, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return lastTx, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return lastTx, err
 	}
 	defer res.Body.Close()
 	if err = json.NewDecoder(res.Body).Decode(&lastTx); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return lastTx, err
 	}
+	span.SetAttributes(attribute.String("request.api", res.Status))
+
 	return lastTx, nil
 }

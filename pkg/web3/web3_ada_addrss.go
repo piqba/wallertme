@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 const (
@@ -73,22 +77,33 @@ type CtbPut struct {
 
 // InfoByAddress get info by address
 func (c *apiClient) InfoByAddress(ctx context.Context, address string) (AddrSumary, error) {
+	_, span := otel.Tracer(nameADA).Start(ctx, "InfoByAddress")
+	defer span.End()
 	requestUrl, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.server, resourceAddress, address))
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return AddrSumary{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestUrl.String(), nil)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return AddrSumary{}, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return AddrSumary{}, err
 	}
 	defer res.Body.Close()
 	sumary := AddrSumary{}
 	if err = json.NewDecoder(res.Body).Decode(&sumary); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return AddrSumary{}, err
 	}
+	span.SetAttributes(attribute.String("request.api", res.Status))
 	return sumary, nil
 }

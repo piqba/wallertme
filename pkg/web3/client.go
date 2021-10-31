@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 // apiClient core struct for our api client logic
@@ -40,6 +42,8 @@ type APIClientOptions struct {
 //
 // More info visit here -> https://explorer-api.testnet.dandelion.link
 func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
+	_, span := otel.Tracer(nameClientAPI).Start(context.Background(), "NewAPICardanoClient")
+	defer span.End()
 	if options.NetworkType == "" {
 		options.NetworkType = CardanoTestNet
 	}
@@ -59,6 +63,7 @@ func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 		client:   retryclient,
 		routines: options.MaxRoutines,
 	}
+	span.SetAttributes(attribute.String("create.client", client.server))
 
 	return client, nil
 }
@@ -74,6 +79,8 @@ type APICardanoClient interface {
 //
 //  More info visit here -> https://api.devnet.solana.com
 func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
+	_, span := otel.Tracer(nameClientAPI).Start(context.Background(), "NewAPISolanaClient")
+	defer span.End()
 	if options.NetworkType == "" {
 		options.NetworkType = SolanaDevNet
 	}
@@ -93,7 +100,7 @@ func NewAPISolanaClient(options APIClientOptions) (APISolanaClient, error) {
 		client:   retryclient,
 		routines: options.MaxRoutines,
 	}
-
+	span.SetAttributes(attribute.String("create.client", client.server))
 	return client, nil
 }
 

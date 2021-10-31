@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+const (
+	// nameSOL is the Tracer nameSOL used to identify this instrumentation library.
+	nameSOL = "web3.solana"
+	// nameADA is the Tracer nameADA used to identify this instrumentation library.
+	nameADA = "web3.cardano"
+	// nameClientAPI is the Tracer nameClientAPI used to identify this instrumentation library.
+	nameClientAPI = "web3.client.rest"
+)
+
 var (
 	// CardanoTestNet ...
 	CardanoTestNet = "CardanoTestNet"
