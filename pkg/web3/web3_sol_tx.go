@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // TxInfo return information related to a TX
@@ -78,22 +82,33 @@ type Instruction struct {
 
 // InfoByTx get info by TX
 func (c *apiClient) InfoByTx(ctx context.Context, payload PayloadReqJSONRPC) (info TxInfo, err error) {
-
+	_, span := otel.Tracer(nameSOL).Start(ctx, "InfoByTx")
+	defer span.End()
 	requestUrl, err := url.Parse(c.server)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return info, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return info, err
 	}
 	res, err := c.handleRequest(req)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return info, err
 	}
 	defer res.Body.Close()
 	if err = json.NewDecoder(res.Body).Decode(&info); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return info, err
 	}
+	span.SetAttributes(attribute.String("request.api", res.Status))
+
 	return info, nil
 }

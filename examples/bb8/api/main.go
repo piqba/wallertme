@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -14,7 +15,7 @@ const (
 
 func main() {
 	repo := domain.NewTx(10)
-	info, err := repo.InfoByAddress(addrReceiver)
+	info, err := repo.InfoByAddress(context.TODO(), addrReceiver)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -58,7 +58,7 @@ func main() {
 	var repo domain.TxRepository
 	switch exporterType {
 	case exporters.REDIS:
-		rdb := exporters.GetRedisDbClient()
+		rdb := exporters.GetRedisDbClient(context.TODO())
 		repo = domain.NewTxRepository(exporters.REDIS, rdb)
 	case exporters.JSONFILE:
 		repo = domain.NewTxRepository(exporters.JSONFILE, nil)
@@ -80,7 +80,7 @@ func main() {
 			defer cancel()
 		case <-time.Tick(ds):
 			for _, w := range wallets {
-				Exce(repo, w, exporterType)
+				Exce(context.TODO(), repo, w, exporterType)
 			}
 			if !watch {
 				run = false
@@ -90,7 +90,7 @@ func main() {
 
 }
 
-func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType string) {
+func Exce(ctx context.Context, repo domain.TxRepository, wallet map[string]interface{}, exporterType string) {
 	symbol := wallet["symbol"].(string)
 	switch symbol {
 	case "ADA":
@@ -121,7 +121,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx, symbol)
+				err := repo.ExportData(ctx, tx)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
@@ -136,7 +136,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 
 			}
 		case exporters.JSONFILE:
-			err := repo.ExportData(tx, symbol)
+			err := repo.ExportData(ctx, tx)
 			if err != nil {
 				logger.LogError(errors.Errorf("main:%s", err).Error())
 			}
@@ -172,7 +172,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx, symbol)
+				err := repo.ExportData(ctx, tx)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(errors.Errorf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr), err).Error())
@@ -187,7 +187,7 @@ func Exce(repo domain.TxRepository, wallet map[string]interface{}, exporterType 
 
 			}
 		case exporters.JSONFILE:
-			err := repo.ExportData(tx, symbol)
+			err := repo.ExportData(ctx, tx)
 			if err != nil {
 				logger.LogError(errors.Errorf("main:%s", err).Error())
 			}

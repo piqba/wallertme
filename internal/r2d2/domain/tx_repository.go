@@ -1,10 +1,19 @@
 package r2d2
 
 import (
+	"context"
 	"reflect"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/piqba/wallertme/pkg/notify"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+)
+
+const (
+	// nameR2d2 is the Tracer nameR2d2 used to identify this instrumentation library.
+	nameR2d2 = "R2d2.domain.tx"
 )
 
 // ExternalOptions ...
@@ -39,8 +48,9 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 }
 
 // SendNotification ...
-func (r *TxRepository) SendNotification(data interface{}) error {
-
+func (r *TxRepository) SendNotification(ctx context.Context, data interface{}) error {
+	_, span := otel.Tracer(nameR2d2).Start(ctx, "SendNotification")
+	defer span.End()
 	t := reflect.TypeOf(data)
 	if t == reflect.TypeOf(ResultLastTxADA{}) {
 
@@ -50,25 +60,31 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 		case notify.TELEGRAM:
 
 			err := notify.SendMessageTG(
+				ctx,
 				r.TGClient,
 				r.Option.DstNotificationID,
 				tx.TemplateTelegram(),
 			)
 			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				return err
 			}
 
 		case notify.DISCORD:
 
 			err := notify.SendMessageDiscord(
+				ctx,
 				r.DiscordClient,
 				tx.TemplateDiscord(),
 			)
 			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				return err
 			}
 		case notify.SMTP:
-			notify.SendMessageSMTP(&r.SMTPClient, tx.TemplateSMTP())
+			notify.SendMessageSMTP(ctx, &r.SMTPClient, tx.TemplateSMTP())
 		}
 	} else if t == reflect.TypeOf(ResultLastTxSOL{}) {
 		tx := data.(ResultLastTxSOL)
@@ -77,27 +93,34 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 		case notify.TELEGRAM:
 
 			err := notify.SendMessageTG(
+				ctx,
 				r.TGClient,
 				r.Option.DstNotificationID,
 				tx.TemplateTelegram(),
 			)
 			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				return err
 			}
 
 		case notify.DISCORD:
 
 			err := notify.SendMessageDiscord(
+				ctx,
 				r.DiscordClient,
 				tx.TemplateDiscord(),
 			)
 			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				return err
 			}
 		case notify.SMTP:
-			notify.SendMessageSMTP(&r.SMTPClient, tx.TemplateSMTP())
+			notify.SendMessageSMTP(ctx, &r.SMTPClient, tx.TemplateSMTP())
 		}
 	}
+	span.SetAttributes(attribute.String("r2d2.domain.SendNotification", "Success"))
 
 	return nil
 }

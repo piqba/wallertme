@@ -8,6 +8,10 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type discordClient struct {
@@ -83,6 +87,8 @@ type Author struct {
 
 // PostMessage send post request msga
 func (c *discordClient) PostMessage(ctx context.Context, message string) error {
+	_, span := otel.Tracer(nameNotifierDiscord).Start(ctx, "PostMessage")
+	defer span.End()
 	payload := PayloadWebHookDiscord{
 		Username: "R2D2",
 		Content:  "This is a notification service",
@@ -102,19 +108,25 @@ func (c *discordClient) PostMessage(ctx context.Context, message string) error {
 	}
 	requestUrl, err := url.Parse(c.serverHook)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl.String(), payload.ToReader())
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	res, err := c.client.Do(req)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
 	defer res.Body.Close()
-
+	span.SetAttributes(attribute.String("notifier.sendmail.client", res.Status))
 	return nil
 }

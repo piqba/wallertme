@@ -9,10 +9,13 @@ import (
 	"time"
 
 	domain "github.com/piqba/wallertme/internal/bb8/domain"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/logger"
+	"github.com/piqba/wallertme/pkg/otelify"
 	"github.com/piqba/wallertme/pkg/storage"
 	"github.com/piqba/wallertme/pkg/web3"
 	"github.com/spf13/cobra"
@@ -31,6 +34,31 @@ var producerCmd = &cobra.Command{
 	Use:   "bb8",
 	Short: "Publish Txs data from (SOLANA|CARDANO) blockchains to (REDIS)",
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Pass to flag variable Write telemetry data to a file.
+		f, err := os.Create("traces.bb8.txt")
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		defer f.Close()
+
+		expo, err := otelify.NewExporter(f)
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		tp := trace.NewTracerProvider(
+			trace.WithBatcher(expo),
+			trace.WithResource(
+				otelify.NewResource(
+					"bb8",
+					"v0.3.2",
+					"dev",
+				),
+			),
+		)
+
+		otel.SetTracerProvider(tp)
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)
 
@@ -58,7 +86,7 @@ var producerCmd = &cobra.Command{
 		// END FLAGS
 
 		// load wallets from source migrate to factory pattern
-		pgx, err := storage.PostgreSQLConnection()
+		pgx, err := storage.PostgreSQLConnection(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 
@@ -68,7 +96,7 @@ var producerCmd = &cobra.Command{
 			PathName: walletsPath,
 			Pgx:      pgx,
 		})
-		wallets, err := dataSource.Wallets()
+		wallets, err := dataSource.Wallets(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
@@ -76,7 +104,7 @@ var producerCmd = &cobra.Command{
 
 		// Define repository to export data
 		var repo domain.TxRepository
-		rdb := exporters.GetRedisDbClient()
+		rdb := exporters.GetRedisDbClient(context.Background())
 		repo = domain.NewTxRepository(exporters.REDIS, rdb)
 
 		// Logic for watcher periodicaly
@@ -93,6 +121,11 @@ var producerCmd = &cobra.Command{
 			select {
 			case sig := <-quit:
 
+				defer func() {
+					if err := tp.Shutdown(context.Background()); err != nil {
+						logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+					}
+				}()
 				logger.LogInfo(fmt.Sprintf("bb8: app is shutting down %v", sig.String()))
 				_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 				run = false
@@ -104,7 +137,7 @@ var producerCmd = &cobra.Command{
 				wg.Add(len(wallets))
 				for _, it := range wallets {
 					go func(wallet storage.Wallet) {
-						Exce(repo, wallet)
+						Exce(context.Background(), repo, wallet)
 						wg.Done()
 					}(it)
 				}
@@ -131,7 +164,7 @@ func init() {
 }
 
 // Exce excecute proccessing functions
-func Exce(repo domain.TxRepository, wallet storage.Wallet) {
+func Exce(ctx context.Context, repo domain.TxRepository, wallet storage.Wallet) {
 
 	symbol := wallet.Symbol
 	address := wallet.Address
@@ -168,7 +201,7 @@ func Exce(repo domain.TxRepository, wallet storage.Wallet) {
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx, symbol)
+				err := repo.ExportData(ctx, tx)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(fmt.Sprintf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr)))
@@ -213,7 +246,7 @@ func Exce(repo domain.TxRepository, wallet storage.Wallet) {
 					tx.TypeTx = TxReceiver
 				}
 
-				err := repo.ExportData(tx, symbol)
+				err := repo.ExportData(ctx, tx)
 				if err != nil {
 					if errors.ErrorIs(err, exporters.ErrRedisXADDStreamID) {
 						logger.LogWarn(errors.Errorf("This ID exist, NOT new TX for %s", tx.TruncateAddress(tx.Addr), err).Error())

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 
@@ -20,7 +21,7 @@ func init() {
 }
 
 func main() {
-	pgx, err := storage.PostgreSQLConnection()
+	pgx, err := storage.PostgreSQLConnection(context.Background())
 	if err != nil {
 		logger.LogError(errors.Errorf("bb8: %v", err).Error())
 
@@ -28,7 +29,7 @@ func main() {
 	dataSource := storage.NewSource("db", storage.OptionsSource{
 		Pgx: pgx,
 	})
-	wallets, err := dataSource.Wallets()
+	wallets, err := dataSource.Wallets(context.Background())
 	if err != nil {
 		logger.LogError(errors.Errorf("bb8: %v", err).Error())
 	}

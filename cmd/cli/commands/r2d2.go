@@ -12,12 +12,15 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
 
 	domain "github.com/piqba/wallertme/internal/r2d2/domain"
 	"github.com/piqba/wallertme/pkg/errors"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/logger"
 	"github.com/piqba/wallertme/pkg/notify"
+	"github.com/piqba/wallertme/pkg/otelify"
 	"github.com/piqba/wallertme/pkg/storage"
 	"github.com/spf13/cobra"
 )
@@ -50,6 +53,31 @@ var consumerCmd = &cobra.Command{
 	Use:   "r2d2",
 	Short: "Subscribe to Txs data topic from (REDIS) and send notifications to this services (telegram|discord|smtp)",
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Pass to flag variable Write telemetry data to a file.
+		f, err := os.Create("traces.r2d2.txt")
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		defer f.Close()
+
+		expo, err := otelify.NewExporter(f)
+		if err != nil {
+			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+
+		}
+		tp := trace.NewTracerProvider(
+			trace.WithBatcher(expo),
+			trace.WithResource(
+				otelify.NewResource(
+					"bb8",
+					"v0.3.2",
+					"dev",
+				),
+			),
+		)
+
+		otel.SetTracerProvider(tp)
 		// flags
 		source, err := cmd.Flags().GetString(flagSource)
 		if err != nil {
@@ -70,7 +98,7 @@ var consumerCmd = &cobra.Command{
 		// end flags
 
 		// load wallets from source migrate to factory pattern
-		pgx, err := storage.PostgreSQLConnection()
+		pgx, err := storage.PostgreSQLConnection(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 
@@ -80,14 +108,14 @@ var consumerCmd = &cobra.Command{
 			PathName: walletsPath,
 			Pgx:      pgx,
 		})
-		wallets, err := dataSource.WalletsTONotify()
+		wallets, err := dataSource.WalletsTONotify(context.Background())
 		if err != nil {
 			logger.LogError(errors.Errorf("bb8: %v", err).Error())
 		}
 		// end Load wallets
 
 		// vars
-		redisDbClient := exporters.GetRedisDbClient()
+		redisDbClient := exporters.GetRedisDbClient(context.Background())
 
 		streams := []string{}
 		// create automatically streams key txs::addr
@@ -128,6 +156,7 @@ var consumerCmd = &cobra.Command{
 				for _, wallet := range wallets {
 
 					Exec(
+						context.Background(),
 						redisDbClient,
 						groupName,
 						it,
@@ -153,6 +182,7 @@ func init() {
 }
 
 func Exec(
+	ctx context.Context,
 	rdb *redis.Client,
 	consumersGroup string,
 	stream redis.XStream,
@@ -182,7 +212,7 @@ func Exec(
 			if wallet.Address == tx.Addr {
 				repo := getNotify(wallet)
 				// sen data to notification provider
-				err = repo.SendNotification(tx)
+				err = repo.SendNotification(ctx, tx)
 				if err != nil {
 					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 				}
@@ -196,7 +226,7 @@ func Exec(
 			if wallet.Address == tx.Addr {
 				repo := getNotify(wallet)
 				// sen data to notification provider
-				err = repo.SendNotification(tx)
+				err = repo.SendNotification(ctx, tx)
 				if err != nil {
 					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
 				}
@@ -210,10 +240,12 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 	var repo domain.TxRepository
 
 	// telegram client
-	tgClientBot := notify.GetTgBot(notify.TgBotOption{
-		Debug: false,
-		Token: "",
-	})
+	tgClientBot := notify.GetTgBot(
+		context.Background(),
+		notify.TgBotOption{
+			Debug: false,
+			Token: "",
+		})
 
 	// smtp client
 	smtpClient := notify.NewSender(

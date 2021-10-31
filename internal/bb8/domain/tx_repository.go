@@ -2,7 +2,6 @@ package bb8
 
 import (
 	"context"
-	"os"
 	"reflect"
 	"time"
 
@@ -10,10 +9,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/piqba/wallertme/pkg/exporters"
 	"github.com/piqba/wallertme/pkg/web3"
-)
-
-var (
-	cwd, _ = os.Getwd()
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // TxRepository repository
@@ -49,8 +47,9 @@ func NewTxRepository(exporterType string, clients ...interface{}) TxRepository {
 }
 
 // ExportData export data from ADA or SOL symbol
-func (r *TxRepository) ExportData(data interface{}, symbol string) error {
-
+func (r *TxRepository) ExportData(ctx context.Context, data interface{}) error {
+	_, span := otel.Tracer(nameBb8).Start(ctx, "ExportData")
+	defer span.End()
 	t := reflect.TypeOf(data)
 	if t == reflect.TypeOf(ResultLastTxADA{}) {
 
@@ -58,10 +57,14 @@ func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 
 		value, err := tx.ToMAP()
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
+		span.SetAttributes(attribute.String("bb8.redis.stream.ada", "Success"))
 
 		return exporters.ExportToRedisStream(
+			ctx,
 			r.clientRdb,
 			exporters.TXS_STREAM_KEY,
 			tx.Addr,
@@ -73,10 +76,14 @@ func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 
 		value, err := tx.ToMAP()
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
+		span.SetAttributes(attribute.String("bb8.redis.stream.sol", "Success"))
 
 		return exporters.ExportToRedisStream(
+			ctx,
 			r.clientRdb,
 			exporters.TXS_STREAM_KEY,
 			tx.Addr,
@@ -89,17 +96,23 @@ func (r *TxRepository) ExportData(data interface{}, symbol string) error {
 }
 
 // InfoByAddress get info by address
-func (r *TxRepository) InfoByAddress(address string) (ResultInfoForADA, error) {
-
+func (r *TxRepository) InfoByAddress(ctx context.Context, address string) (ResultInfoForADA, error) {
+	_, span := otel.Tracer(nameBb8).Start(ctx, "InfoByAddress")
+	defer span.End()
 	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return ResultInfoForADA{}, err
 	}
 
 	sumary, err := cardano.InfoByAddress(context.TODO(), address)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return ResultInfoForADA{}, err
 	}
+	span.SetAttributes(attribute.String("bb8.domain.info.address", "Success"))
 
 	return ResultInfoForADA{
 		Address:   address,
@@ -117,20 +130,32 @@ func (r *TxRepository) InfoByAddress(address string) (ResultInfoForADA, error) {
 
 // Set an address as a key and the last TX as a value
 func (r *TxRepository) Set(ctx context.Context, address, lastTx string, expiration time.Duration) error {
+	_, span := otel.Tracer(nameBb8).Start(ctx, "Set")
+	defer span.End()
 	// err = redisdb.Set("key", "value", 0).Err() never expire
 	// err = redisdb.Set("key", "value", time.Hour).Err()
 	err := r.clientRdb.Set(ctx, address, lastTx, expiration).Err()
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+	span.SetAttributes(attribute.String("bb8.domain.Set.redis", "Success"))
+
 	return nil
 }
 
 // Get the last tx value  by address as a key
 func (r *TxRepository) Get(ctx context.Context, address string) (string, error) {
+	_, span := otel.Tracer(nameBb8).Start(ctx, "Get")
+	defer span.End()
 	lastTx, err := r.clientRdb.Get(ctx, address).Result()
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return "", err
 	}
+	span.SetAttributes(attribute.String("bb8.domain.Get.redis", "Success"))
+
 	return lastTx, nil
 }
