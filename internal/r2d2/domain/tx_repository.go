@@ -1,6 +1,7 @@
 package r2d2
 
 import (
+	"context"
 	"reflect"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -39,7 +40,7 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 }
 
 // SendNotification ...
-func (r *TxRepository) SendNotification(data interface{}) error {
+func (r *TxRepository) SendNotification(ctx context.Context, data interface{}) error {
 
 	t := reflect.TypeOf(data)
 	if t == reflect.TypeOf(ResultLastTxADA{}) {
@@ -50,6 +51,7 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 		case notify.TELEGRAM:
 
 			err := notify.SendMessageTG(
+				ctx,
 				r.TGClient,
 				r.Option.DstNotificationID,
 				tx.TemplateTelegram(),
@@ -61,6 +63,7 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 		case notify.DISCORD:
 
 			err := notify.SendMessageDiscord(
+				ctx,
 				r.DiscordClient,
 				tx.TemplateDiscord(),
 			)
@@ -68,7 +71,7 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 				return err
 			}
 		case notify.SMTP:
-			notify.SendMessageSMTP(&r.SMTPClient, tx.TemplateSMTP())
+			notify.SendMessageSMTP(ctx, &r.SMTPClient, tx.TemplateSMTP())
 		}
 	} else if t == reflect.TypeOf(ResultLastTxSOL{}) {
 		tx := data.(ResultLastTxSOL)
@@ -77,6 +80,7 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 		case notify.TELEGRAM:
 
 			err := notify.SendMessageTG(
+				ctx,
 				r.TGClient,
 				r.Option.DstNotificationID,
 				tx.TemplateTelegram(),
@@ -88,6 +92,7 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 		case notify.DISCORD:
 
 			err := notify.SendMessageDiscord(
+				ctx,
 				r.DiscordClient,
 				tx.TemplateDiscord(),
 			)
@@ -95,7 +100,7 @@ func (r *TxRepository) SendNotification(data interface{}) error {
 				return err
 			}
 		case notify.SMTP:
-			notify.SendMessageSMTP(&r.SMTPClient, tx.TemplateSMTP())
+			notify.SendMessageSMTP(ctx, &r.SMTPClient, tx.TemplateSMTP())
 		}
 	}
 
