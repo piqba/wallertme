@@ -27,6 +27,7 @@ type TxRepository struct {
 	Option        ExternalOptions
 	TGClient      *tgbotapi.BotAPI
 	DiscordClient notify.DiscordClient
+	WebHookClient notify.WebHookClient
 	SMTPClient    notify.Sender
 }
 
@@ -40,6 +41,8 @@ func NewTxRepository(options ExternalOptions, clients ...interface{}) TxReposito
 			repo.TGClient = c
 		case notify.DiscordClient:
 			repo.DiscordClient = c
+		case notify.WebHookClient:
+			repo.WebHookClient = c
 		case notify.Sender:
 			repo.SMTPClient = c
 		}
@@ -83,6 +86,18 @@ func (r *TxRepository) SendNotification(ctx context.Context, data interface{}) e
 				span.SetStatus(codes.Error, err.Error())
 				return err
 			}
+		case notify.WEBHOOK:
+
+			err := notify.SendMessageWebHook(
+				ctx,
+				r.DiscordClient,
+				tx.TemplateDiscord(),
+			)
+			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
+				return err
+			}
 		case notify.SMTP:
 			notify.SendMessageSMTP(ctx, &r.SMTPClient, tx.TemplateSMTP())
 		}
@@ -107,6 +122,18 @@ func (r *TxRepository) SendNotification(ctx context.Context, data interface{}) e
 		case notify.DISCORD:
 
 			err := notify.SendMessageDiscord(
+				ctx,
+				r.DiscordClient,
+				tx.TemplateDiscord(),
+			)
+			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
+				return err
+			}
+		case notify.WEBHOOK:
+
+			err := notify.SendMessageWebHook(
 				ctx,
 				r.DiscordClient,
 				tx.TemplateDiscord(),

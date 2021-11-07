@@ -19,10 +19,6 @@ type discordClient struct {
 	client     *http.Client
 }
 
-type HttpRequestDoer interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 // DiscordClientOptions ...
 type DiscordClientOptions struct {
 
@@ -87,7 +83,7 @@ type Author struct {
 
 // PostMessage send post request msga
 func (c *discordClient) PostMessage(ctx context.Context, message string) error {
-	_, span := otel.Tracer(nameNotifierDiscord).Start(ctx, "PostMessage")
+	_, span := otel.Tracer(nameNotifierDiscord).Start(ctx, "discord.PostMessage")
 	defer span.End()
 	payload := PayloadWebHookDiscord{
 		Username: "R2D2",
@@ -127,6 +123,6 @@ func (c *discordClient) PostMessage(ctx context.Context, message string) error {
 	}
 
 	defer res.Body.Close()
-	span.SetAttributes(attribute.String("notifier.sendmail.client", res.Status))
+	span.SetAttributes(attribute.String("notifier.discord.client", res.Status))
 	return nil
 }
