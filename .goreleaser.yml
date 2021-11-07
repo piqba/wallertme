@@ -48,6 +48,10 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+    files:
+      - docs/*
+      - README.md
+      - wallets_template.json
 checksum:
   name_template: 'checksums.txt'
 snapshot:
