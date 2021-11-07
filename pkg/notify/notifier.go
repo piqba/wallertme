@@ -2,6 +2,7 @@ package notify
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -13,6 +14,7 @@ import (
 const (
 	TELEGRAM = "telegram"
 	DISCORD  = "discord"
+	WEBHOOK  = "webhook"
 	SMTP     = "smtp"
 	// nameNotifier is the Tracer nameNotifier used to identify this instrumentation library.
 	nameNotifier = "notify.notifier"
@@ -22,11 +24,17 @@ const (
 	nameNotifierSMTP = "notify.notifier.smtp"
 	// nameNotifierDiscord is the Tracer nameNotifierDiscord used to identify this instrumentation library.
 	nameNotifierDiscord = "notify.notifier.discord"
+	// nameNotifierWebHook is the Tracer nameNotifierWebHook used to identify this instrumentation library.
+	nameNotifierWebHook = "notify.notifier.webhook"
 )
 
 // Notifier ...
 type Notifier interface {
 	SendNotification(ctx context.Context, data interface{}) error
+}
+
+type HttpRequestDoer interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
 // SendMessageTG send msg to telegram
@@ -55,6 +63,21 @@ func SendMessageDiscord(ctx context.Context, discordClient DiscordClient, messag
 		return err
 	}
 	span.SetAttributes(attribute.String("notifier.discord", "Success"))
+
+	return nil
+}
+
+// SendMessageWebHook send msg to webhook
+func SendMessageWebHook(ctx context.Context, webhookClient WebHookClient, message string) error {
+	_, span := otel.Tracer(nameNotifier).Start(ctx, "SendMessageWebHook")
+	defer span.End()
+	err := webhookClient.PostMessage(context.TODO(), message)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+	span.SetAttributes(attribute.String("notifier.webhook", "Success"))
 
 	return nil
 }

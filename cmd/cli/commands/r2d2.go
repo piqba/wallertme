@@ -56,14 +56,14 @@ var consumerCmd = &cobra.Command{
 		// TODO: Pass to flag variable Write telemetry data to a file.
 		f, err := os.Create("traces.r2d2.txt")
 		if err != nil {
-			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 
 		}
 		defer f.Close()
 
 		expo, err := otelify.NewExporter(f)
 		if err != nil {
-			logger.LogError(errors.Errorf("walletctl: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 
 		}
 		tp := trace.NewTracerProvider(
@@ -81,26 +81,26 @@ var consumerCmd = &cobra.Command{
 		// flags
 		source, err := cmd.Flags().GetString(flagSource)
 		if err != nil {
-			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 		}
 		groupName, err := cmd.Flags().GetString(flagConsumerGroup)
 		if err != nil {
-			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 		}
 		walletsPath, err := cmd.Flags().GetString(flagWalletsPath)
 		if err != nil {
-			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 		}
 		walletsName, err := cmd.Flags().GetString(flagWalletsName)
 		if err != nil {
-			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 		}
 		// end flags
 
 		// load wallets from source migrate to factory pattern
 		pgx, err := storage.PostgreSQLConnection(context.Background())
 		if err != nil {
-			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 
 		}
 		dataSource := storage.NewSource(source, storage.OptionsSource{
@@ -110,7 +110,7 @@ var consumerCmd = &cobra.Command{
 		})
 		wallets, err := dataSource.WalletsTONotify(context.Background())
 		if err != nil {
-			logger.LogError(errors.Errorf("bb8: %v", err).Error())
+			logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 		}
 		// end Load wallets
 
@@ -207,28 +207,28 @@ func Exec(
 			tx := domain.ResultLastTxADA{}
 			err := json.Unmarshal(bytes, &tx)
 			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+				logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 			}
 			if wallet.Address == tx.Addr {
 				repo := getNotify(wallet)
 				// sen data to notification provider
 				err = repo.SendNotification(ctx, tx)
 				if err != nil {
-					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+					logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 				}
 			}
 		} else {
 			tx := domain.ResultLastTxSOL{}
 			err := json.Unmarshal(bytes, &tx)
 			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+				logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 			}
 			if wallet.Address == tx.Addr {
 				repo := getNotify(wallet)
 				// sen data to notification provider
 				err = repo.SendNotification(ctx, tx)
 				if err != nil {
-					logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+					logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 				}
 			}
 		}
@@ -260,7 +260,7 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 		case notify.TELEGRAM:
 			tgID, err := strconv.Atoi(n.UserID)
 			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+				logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 			}
 			repo = domain.NewTxRepository(
 				domain.ExternalOptions{
@@ -275,13 +275,27 @@ func getNotify(wallet storage.Wallet) domain.TxRepository {
 				ServerHook: n.UserID,
 			})
 			if err != nil {
-				logger.LogError(errors.Errorf("r2d2ctl: %v", err).Error())
+				logger.LogError(errors.Errorf("r2d2: %v", err).Error())
 			}
 			repo = domain.NewTxRepository(
 				domain.ExternalOptions{
 					Type: n.Name,
 				},
 				discordClient,
+			)
+		case notify.WEBHOOK:
+			// webHookClient client
+			webHookClient, err := notify.NewWebHookClient(notify.WebHookClientOptions{
+				ServerHook: n.UserID,
+			})
+			if err != nil {
+				logger.LogError(errors.Errorf("r2d2: %v", err).Error())
+			}
+			repo = domain.NewTxRepository(
+				domain.ExternalOptions{
+					Type: n.Name,
+				},
+				webHookClient,
 			)
 		case notify.SMTP:
 			repo = domain.NewTxRepository(domain.ExternalOptions{

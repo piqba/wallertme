@@ -1,0 +1,38 @@
+[
+    {
+        "address": "",
+        "symbol": "ADA",
+        "is_active": true,
+        "notifier_service": [
+            {
+                "name": "telegram",
+                "user_id": "numberID"
+            }
+        ],
+        "network_type": "CardanoTestNet"
+    },
+    {
+        "address": "",
+        "symbol": "ADA",
+        "is_active": true,
+        "notifier_service": [
+            {
+                "name": "telegram",
+                "user_id": "numberID"
+            }
+        ],
+        "network_type": "CardanoTestNet"
+    },
+    {
+        "address": "",
+        "symbol": "SOL",
+        "is_active": true,
+        "notifier_service": [
+            {
+                "name": "discord",
+                "user_id": "https://discordapp.com/api/webhooks/<hook>"
+            }
+        ],
+        "network_type": "SolanaDevNet"
+    }
+]
