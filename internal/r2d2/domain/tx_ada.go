@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/piqba/wallertme/pkg/logger"
 	"github.com/piqba/wallertme/pkg/web3"
@@ -40,7 +39,7 @@ func (rtx *ResultLastTxADA) ToJSON() string {
 }
 
 // parseField ...
-func (tx *ResultLastTxADA) parseField() (float64, float64, time.Time) {
+func (tx *ResultLastTxADA) parseField() (float64, float64, string) {
 	balance, err := strconv.ParseInt(tx.Balance, 10, 64)
 	if err != nil {
 		logger.LogError(err.Error())
@@ -52,13 +51,13 @@ func (tx *ResultLastTxADA) parseField() (float64, float64, time.Time) {
 	}
 	newAmmount := float64(ammount) / 1_000_000
 
-	timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
-	if err != nil {
-		logger.LogError(err.Error())
-	}
-	//Unix Timestamp to time.Time
-	timeT := time.Unix(timestampUnix, 0)
-	return newBalance, newAmmount, timeT
+	// timestampUnix, err := strconv.ParseInt(tx.CtbTimeIssued, 10, 64)
+	// if err != nil {
+	// 	logger.LogError(err.Error())
+	// }
+	// //Unix Timestamp to time.Time
+	// timeT := time.Unix(timestampUnix, 0)
+	return newBalance, newAmmount, tx.CtbTimeIssued
 }
 
 // ToMAP ...
@@ -103,7 +102,7 @@ func (tx *ResultLastTxADA) TemplateTelegram() string {
 		tx.TypeTx,
 		tx.TruncateAddress(tx.FromAddr),
 		tx.TruncateAddress(tx.ToAddr),
-		timeT.String(),
+		timeT,
 	)
 }
 
@@ -127,7 +126,7 @@ func (tx *ResultLastTxADA) TemplateDiscord() string {
 		tx.TypeTx,
 		tx.TruncateAddress(tx.FromAddr),
 		tx.TruncateAddress(tx.ToAddr),
-		timeT.String(),
+		timeT,
 	)
 }
 
@@ -205,7 +204,7 @@ func (tx *ResultLastTxADA) TemplateSMTP() string {
 		tx.TypeTx,
 		tx.TruncateAddress(tx.FromAddr),
 		tx.TruncateAddress(tx.ToAddr),
-		timeT.String(),
+		timeT,
 	)
 
 }

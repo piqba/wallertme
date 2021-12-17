@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	ADA = exporters.TXS_STREAM_KEY + ":" + "ADA"
-	SOL = exporters.TXS_STREAM_KEY + ":" + "SOL"
+	ADA = exporters.TXS_STREAM_KEY + "::" + "addr_test1qq6g6s99g9z9w0mlvew28w40lpml9rwfkfgerpkg6g2vpn6dp4cf7k9drrdy0wslarr6hxspcw8ev5ed8lfrmaengneqz34lcx"
+	SOL = exporters.TXS_STREAM_KEY + "::" + "9hZaTvCVMcfbheTzebkeGR6Xi2EzMqTtPasbhGoPB94C"
 )
 
 func init() {

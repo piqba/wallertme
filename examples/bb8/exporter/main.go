@@ -96,15 +96,15 @@ func Exce(ctx context.Context, repo domain.TxRepository, wallet map[string]inter
 	case "ADA":
 		addrInfo := lastTXForADA(wallet["address"].(string))
 
-		lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
+		lastTX := addrInfo.Data.Utxos[0]
 		tx := domain.ResultLastTxADA{
 			Addr:          wallet["address"].(string),
-			CtbID:         lastTX.CtbID,
-			CtbTimeIssued: fmt.Sprintf("%d", lastTX.CtbTimeIssued),
-			FromAddr:      lastTX.CtbOutputs[0].CtaAddress,
-			ToAddr:        lastTX.CtbOutputs[1].CtaAddress,
-			Balance:       addrInfo.Result.CABalance.GetCoin,
-			Ammount:       lastTX.CtbOutputs[1].CtaAmount.GetCoin,
+			CtbID:         lastTX.TxHash,
+			CtbTimeIssued: lastTX.Transaction.IncludedAt,
+			FromAddr:      lastTX.Transaction.Outputs[0].Address,
+			ToAddr:        lastTX.Transaction.Outputs[1].Address,
+			Ammount:       lastTX.Transaction.Inputs[0].Value,
+			Balance:       lastTX.Transaction.Inputs[1].Value,
 		}
 		switch exporterType {
 		case exporters.REDIS:
@@ -196,18 +196,45 @@ func Exce(ctx context.Context, repo domain.TxRepository, wallet map[string]inter
 
 }
 
-func lastTXForADA(address string) web3.AddrSumary {
-	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
+func lastTXForADA(address string) web3.TxByAddrADAV2 {
+	cardanoApi, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
 	if err != nil {
 		logger.LogError(errors.Errorf("main:%s", err).Error())
 	}
-
-	sumary, err := cardano.InfoByAddress(context.TODO(), address)
-	if err != nil {
-		logger.LogError(errors.Errorf("main:%s", err).Error())
+	pld := web3.PayloadReqJSONGQL{
+		Query: `
+		query utxoSetForAddress (
+			$address: String!
+		){
+			utxos(
+				order_by: { value: desc }
+				where: { address: { _eq: $address }}
+				limit :1
+			) {
+				# address,
+				value,
+			  txHash,
+			  transaction{
+				block{number, hash},
+				fee,
+				totalOutput,
+				includedAt,
+				inputs{address,value},
+				outputs{address, value}
+			  },
+			}
+		}
+		`,
+		Variables: map[string]string{
+			"address": address,
+		},
 	}
 
-	return sumary
+	data, err := cardanoApi.LastTxByAddressADA(context.Background(), pld)
+	if err != nil {
+		logger.LogError(err.Error())
+	}
+	return data
 }
 func lastTXForSOL(address string) web3.TxInfo {
 	solanaApi, err := web3.NewAPISolanaClient(web3.APIClientOptions{})

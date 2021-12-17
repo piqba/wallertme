@@ -28,7 +28,7 @@ var (
 	NetworkMap = map[string]BlockchainNet{
 		CardanoTestNet: {
 			NameNet:     "CardanoTestNet",
-			ApiURL:      "https://explorer-api.testnet.dandelion.link",
+			ApiURL:      "https://graphql-api.testnet.dandelion.link/",
 			ExplorerURL: "https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=%s",
 		},
 		SolanaDevNet: {
@@ -65,6 +65,20 @@ type PayloadReqJSONRPC struct {
 
 // ToReader convert string result to reader interfaces
 func (p *PayloadReqJSONRPC) ToReader() *strings.Reader {
+	byte, err := json.Marshal(p)
+	if err != nil {
+		log.Println(err)
+	}
+	return strings.NewReader(string(byte))
+}
+
+type PayloadReqJSONGQL struct {
+	Query     string            `json:"query,omitempty"`
+	Variables map[string]string `json:"variables,omitempty"`
+}
+
+// ToReader convert string result to reader interfaces
+func (p *PayloadReqJSONGQL) ToReader() *strings.Reader {
 	byte, err := json.Marshal(p)
 	if err != nil {
 		log.Println(err)

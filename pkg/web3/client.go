@@ -72,6 +72,7 @@ func NewAPICardanoClient(options APIClientOptions) (APICardanoClient, error) {
 type APICardanoClient interface {
 	// InfoByAddress ...
 	InfoByAddress(ctx context.Context, address string) (AddrSumary, error)
+	LastTxByAddressADA(ctx context.Context, payload PayloadReqJSONGQL) (TxByAddrADAV2, error)
 }
 
 // NewAPISolanaClient is a function in charge of to proccess all logic from solana API
