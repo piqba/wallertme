@@ -8,7 +8,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/piqba/wallertme/pkg/exporters"
-	"github.com/piqba/wallertme/pkg/web3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -93,39 +92,6 @@ func (r *TxRepository) ExportData(ctx context.Context, data interface{}) error {
 	}
 
 	return nil
-}
-
-// InfoByAddress get info by address
-func (r *TxRepository) InfoByAddress(ctx context.Context, address string) (ResultInfoForADA, error) {
-	_, span := otel.Tracer(nameBb8).Start(ctx, "InfoByAddress")
-	defer span.End()
-	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{})
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return ResultInfoForADA{}, err
-	}
-
-	sumary, err := cardano.InfoByAddress(context.TODO(), address)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return ResultInfoForADA{}, err
-	}
-	span.SetAttributes(attribute.String("bb8.domain.info.address", "Success"))
-
-	return ResultInfoForADA{
-		Address:   address,
-		Type:      sumary.Result.CAType,
-		BlockNO:   sumary.Result.CAChainTip.CTBlockNo,
-		BlockHash: sumary.Result.CAChainTip.CTBlockHash,
-		TxTotal:   sumary.Result.CATxNum,
-		Balance:   sumary.Result.CABalance.GetCoin,
-		TotalIn:   sumary.Result.CATotalInput.GetCoin,
-		TotalOut:  sumary.Result.CATotalOutput.GetCoin,
-		TotalFee:  sumary.Result.CATotalFee.GetCoin,
-		TxList:    sumary.Result.CATxList,
-	}, nil
 }
 
 // Set an address as a key and the last TX as a value

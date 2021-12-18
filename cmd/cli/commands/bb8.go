@@ -177,15 +177,15 @@ func Exce(ctx context.Context, repo domain.TxRepository, wallet storage.Wallet) 
 		case "ADA":
 			addrInfo := lastTXForADA(networkType, address)
 
-			lastTX := addrInfo.Result.CATxList[len(addrInfo.Result.CATxList)-1]
+			lastTX := addrInfo.Data.Utxos[0]
 			tx := domain.ResultLastTxADA{
 				Addr:          address,
-				CtbID:         lastTX.CtbID,
-				CtbTimeIssued: fmt.Sprintf("%d", lastTX.CtbTimeIssued),
-				FromAddr:      lastTX.CtbOutputs[0].CtaAddress,
-				ToAddr:        lastTX.CtbOutputs[1].CtaAddress,
-				Balance:       addrInfo.Result.CABalance.GetCoin,
-				Ammount:       lastTX.CtbOutputs[1].CtaAmount.GetCoin,
+				CtbID:         lastTX.TxHash,
+				CtbTimeIssued: lastTX.Transaction.IncludedAt,
+				FromAddr:      lastTX.Transaction.Outputs[0].Address,
+				ToAddr:        lastTX.Transaction.Outputs[1].Address,
+				Ammount:       lastTX.Transaction.Inputs[0].Value,
+				Balance:       lastTX.Transaction.Inputs[1].Value,
 				Symbol:        symbol,
 			}
 
@@ -269,7 +269,7 @@ func Exce(ctx context.Context, repo domain.TxRepository, wallet storage.Wallet) 
 }
 
 // lastTXForADA return las TX from Cardano
-func lastTXForADA(networkType, address string) web3.AddrSumary {
+func lastTXForADA(networkType, address string) web3.TxByAddrADAV2 {
 	cardano, err := web3.NewAPICardanoClient(web3.APIClientOptions{
 		NetworkType: networkType,
 	})
@@ -277,7 +277,36 @@ func lastTXForADA(networkType, address string) web3.AddrSumary {
 		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
 
-	sumary, err := cardano.InfoByAddress(context.TODO(), address)
+	pld := web3.PayloadReqJSONGQL{
+		Query: `
+		query utxoSetForAddress (
+			$address: String!
+		){
+			utxos(
+				order_by: { value: desc }
+				where: { address: { _eq: $address }}
+				limit :1
+			) {
+				# address,
+				value,
+			  txHash,
+			  transaction{
+				block{number, hash},
+				fee,
+				totalOutput,
+				includedAt,
+				inputs{address,value},
+				outputs{address, value}
+			  },
+			}
+		}
+		`,
+		Variables: map[string]string{
+			"address": address,
+		},
+	}
+
+	sumary, err := cardano.LastTxByAddressADA(context.Background(), pld)
 	if err != nil {
 		logger.LogError(errors.Errorf("bb8: %s", err).Error())
 	}
